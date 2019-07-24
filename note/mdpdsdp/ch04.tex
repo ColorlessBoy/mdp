@@ -1,0 +1,198 @@
+% Chapter04 Finite-Horizon Markov Decision Processes, Markov Decision Process Discrete Stochastic Dynamic Programming
+
+\section{Chapter4: Finite-Horizon Markov Decision Processes}%
+\label{sec:chapter4}
+
+\subsection{OPTIMALITY CRITERIA}%
+\label{sub:optimality_criteria}
+
+\subsubsection{Some Preliminaries}%
+\label{subsub:some_preliminaries}
+
+About MDP:\@
+\begin{enumerate}
+    \item $ \pi = (d_1, d_2, \ldots, d_{N-1}, \ldots) \in \Pi^{HR}$;
+    \item $ h_N = (s_1, a_1, s_2, \ldots, s_N) $ 
+    \item Rewards sequence: $ \{ r_1(s_1, a_1), r_2(s_2,a_2), \ldots, r_{N-1}(s_{N-1}, a_{N-1}), r_N(s_N) \} $ 
+        \begin{itemize}
+            \item $ \pi \in \Pi^{HD} $, $ \left\{ r_1(X_1, d_1(h_1)), \ldots, r_{N-1}(X_{N-1}, d_{N-1}(h_{N-1})), r_N(X_N) \right\} $ 
+            \item $ \pi \in \Pi^{MD} $, $ \left\{ r_1(X_1, d_1(X_1)), \ldots, r_{N-1}(X_{N-1}, d_{N-1}(X_{N-1})), r_N(X_N) \right\} $ 
+        \end{itemize}
+    \item $ R = (R_1, R_2, \ldots, R_N) $, where $ R_t = r_t(X_t, Y_t) $, and $ |R_t| \le M < \infty $.
+    \item $ \mathbb{P}^\pi_{R} (\rho_1, \rho_2, \ldots, \rho_N) = \mathbb{P}^\pi 
+        \left[ \left\{ (s_1, a_1, \ldots, s_N):(r(s_1, a_1),\ldots, r_N(s_N)) = (\rho_1, \ldots, \rho_N) \right\} \right]$ 
+\end{enumerate}
+
+Definition:
+\begin{enumerate}
+    \item The random vairable U is stochastically greater than V:\@ 
+        \[
+            \forall t \in \mathbb{R},\quad P(V > t) \le P(U > t).
+        \]
+    \item Probability distribution $ P_2 $ is stochastically greater than $ P_1 $ if:
+        \[
+            \forall t \in \mathbb{R},\quad \int^\infty_t p_1(t) dt \le \int^\infty_t p_2(t)dt.
+        \]
+    \item The random vector $ \vec U = (U_1, \ldots, U_n) $ is stochastically greater than the random vector $ \vec V = (V_1, \ldots, V_n) $:
+        \[
+          \forall f \in \{ f: \mathbb{R}^n \rightarrow \mathbb{R} | \vec v \preceq \vec u \Rightarrow f(\vec v) \le f(\vec u) \},\quad
+          \mathbb{E}[f(\vec V)] \le \mathbb{E}[f(\vec U)]
+        \]
+\end{enumerate}
+
+\subsubsection{The Expected Total Reward Criterion}%
+
+The expected total reward criterion:
+\begin{enumerate}
+    \item $ \pi \in \Pi^{HR} $:
+        $ v^\pi_N(s) = \mathbb{E}^\pi_S \left\{ \sum^{N-1}_{t=1} r_t(X_t, Y_t) + r_N(X_N) \right\}. $
+    \item $ \pi \in \Pi^{HD} $:
+        $ v^\pi_N(s) = \mathbb{E}^\pi_S \left\{ \sum^{N-1}_{t=1} r_t(X_t, d_t(h_t)) + r_N(X_N) \right\}. $
+    \item Discounted reward:$ \pi \in \Pi^{HR} $,\\
+        $ v^\pi_{N, \lambda}(s) = \mathbb{E}^\pi_S \left\{ \sum^{N-1}_{t=1} \lambda^{t-1}r_t(X_t, d_t(h_t)) + \lambda^{N-1}r_N(X_N) \right\}. $\\
+        Taking the discount factor into account does not effect any theoretical results or algorithms in the finite-horizon case but might effect the decision maker's preference for policies.
+\end{enumerate}
+
+\subsubsection{Optimal Policies}
+Definition:
+\begin{enumerate}
+    \item Optimal policy $ \pi^*: \forall \pi \in \Pi^{HR}, v^{\pi^*}_N \succeq v^\pi_N $.
+    \item $ \epsilon-$optimal policy, $ \pi^*: \forall \pi \in \Pi^{HR}, v^{\pi^*_\epsilon}_N + \epsilon \succeq v^\pi_N $.
+    \item Optimal value: $ v^*_N = \sup_{\pi\in\Pi^{HR}} v^\pi_N $. 
+    \item We can get $ v^{\pi^*}_N = v^*_N $ and $ v^{\pi^*_\epsilon}_N + \epsilon > v^*_N $.
+    \item Considering initial state distribution $ P_1 $:
+        $ v^{\pi, P_1}_N = \sum^{}_{s\in S} v^\pi_{N}(s) P_1 \{ X_1 = s \} $.
+\end{enumerate}
+\[   
+    \text{Markov decision problem} = \text{Markov decision process} + \text{Optimality criteria}
+\]
+
+\subsection{FINITE-HORIZON POLICY EVALUATION}%
+\label{sub:finite_horizon_policy_evaluation}
+
+\begin{enumerate}
+    \item $ \pi = (d_1, d_2, \ldots, d_{N-1}) \in \Pi^{HR} $
+    \item Define: $ u^\pi_t(h_t) = \mathbb{E}^\pi_{h_t} \left\{ \sum^{N-1}_{n=t} r_n(X_n, Y_n) + r_N(X_N) \right\} $,
+        ($ u^\pi_t: H_t \rightarrow \mathbb{R} $). And we define $ U^\pi_N(h_N) = r_N(s_N) $.
+    \item Finite horizon-policy evaluation algorithm ($ \pi \in \Pi^{HD} )$:
+        \begin{align*}
+            \label{eq:}
+            \hat u^\pi_t(h_t) =& r_t(s_t, d_t(h_t)) + \sum^{}_{s' \in S} p_t(s' | s_t, d_t(h_t)) \hat u^\pi_{t+1} (h_t, d_t(h_t), s').\quad ((h_t, d_t(h_t), s') \in H_{t+1}) \\
+            =& r_t(s_t, d_t(h_t)) +  \mathbb{E}^\pi_{h_t} \left\{ \hat u^\pi_{t+1} (h_t, d_t(h_t), X_{t+1}) \right\}
+        \end{align*}
+        \begin{proof}
+            Part proof with backward induction hypothesis ($ u^\pi_{h_{t+1}} = \hat u^\pi_{h_{t+1}} $):
+            \begin{align*}
+                \hat u^\pi_t(h_t)
+                =& r_t(s_t, d_t(h_t)) +  \mathbb{E}^\pi_{h_t} \left\{ u^\pi_{t+1} (h_t, d_t(h_t), X_{t+1}) \right\} \\
+                =& r_t(s_t, d_t(h_t)) +  \mathbb{E}^\pi_{h_t} \left\{ \mathbb{E}^\pi_{h_{t+1}} \left\{ \sum^{N-1}_{n={t+1}} r_n(X_n, Y_n) + r_N(X_N) \right\} \right\} \\
+                =&  r_t(s_t, d_t(h_t)) +  \mathbb{E}^\pi_{h_t} \left\{ \sum^{N-1}_{n={t+1}} r_n(X_n, Y_n) + r_N(X_N) \right\} \\
+                =& \mathbb{E}^\pi_{h_t} \left\{ r_t(s_t, d_t(h_t)) + \sum^{N-1}_{n={t+1}} r_n(X_n, Y_n) + r_N(X_N) \right\} = u^\pi_t(h_t)
+            \end{align*}
+        \end{proof}
+     \item Finite horizon-policy evaluation algorithm ($ \pi \in \Pi^{HR} )$:
+         \[
+             \hat u^\pi_t(h_t) = \sum^{}_{a \in A_{s_t}} q_{d_t(h_t)} (a) \left\{ r_t(s_t, d_t(h_t)) + \sum^{}_{s' \in S} p_t(s' | s_t, d_t(h_t)) \hat u^\pi_{t+1} (h_t, d_t(h_t), s'). \right\}
+         \]
+     \item Finite horizon-policy evaluation algorithm ($ \pi \in \Pi^{MR} )$:
+         \[
+             \hat u^\pi_t(s_t) = r_t(s_t, d_t(s_t)) + \sum^{}_{s' \in S} p_t(s' | s_t, d_t(s_t)) \hat u^\pi_{t+1} (s').
+         \]
+     \item The computation complexity. There are $ K $ states and $ L $ actions, then:
+         \begin{itemize}
+         \item If $ \pi \in \Pi^{HD} $, then requiring $ K^2 \sum^{N-1}_{i=0} {(KL)}^i $ multiplications.
+         \item If $ \pi \in \Pi^{MD} $, then requiring $(N-1)K^2$ multiplications.
+         \end{itemize}
+\end{enumerate}
+
+\subsection{OPTIMALITY EQUATIONS AND THE PRINCIPLE OF OPTIMALITY}%
+\label{sub:optimality_equations_and_the_principle_of_optimality}
+
+\textbf{Optimality equations (Bellman equations or functional equations).}
+
+We start study this equation:
+\[ u^*_t(h_t) = \sup_{\pi \in \Pi^{HR}} u^\pi_t(h_t) \]
+When minimizing costs instead of maximizing rewards, we sometimes refer to $ u^*_t $ as a \textbf{cost-to-go} funciton.
+
+\begin{definition}
+    \textbf{(Optimality equations).}
+    \begin{equation}
+       \hat u_t(h_t) = \sup_{a \in A_{s_t}} \left\{ r_t(s_t, a) + \sum^{}_{s' \in S} p_t(s' | s_t, a) \hat u_{t+1} (h_t, a, s') \right\}, \quad s.t.\ \hat u_N(h_N) = r_N(s_N).
+    \end{equation}
+    If $ A_{s_t} $ is finite, it can be replaced by $ \max $.
+    Then, $ \forall h_t, \hat u_t(h_t) = u^*_t(h_t) $.
+    \begin{proof}
+        The proof is in two parts.\\
+        Let arbitrary $ \pi' = (d'_1, d'_2, \ldots, d'_{N-1}) \in \Pi^{HR} $. \\ 
+        Step1:\\
+        First, we have $ u^{\pi'}_N(h_N) = \hat u_N(h_N) = u^*_N(h_N) $. \\
+        Then, because we take the operation $ \sup $, we reasonably have $ \hat u_{N-1}(h_{N-1}) \ge u^*_{N-1}(h_{N-1}) $.\\
+        Assuming that $ \forall h_t \in H_t$, and $t = n+1, \ldots, N$, we have $\hat u_t(h_t) \ge u^*_t(h_t) $.
+        \begin{align*}
+            \hat u_n(h_n) =& \sup_{a \in A_{s_n}} \left\{ r_n(s_n, a) + \sum^{}_{s' \in S} p_n(s' | s_n, a) \hat u_{n+1} (h_n, a, s') \right\} \\
+            \ge& \sup_{a \in A_{s_n}} \left\{ r_n(s_n, a) + \sum^{}_{s' \in S} p_n(s' | s_n, a) u^*_{n+1} (s_n, a, s') \right\} \\
+            \ge& \sum^{}_{a \in A_{s_n}} q_{d'_n(h_n)} (a) \left\{ r_n(s_n, a) + \sum^{}_{s' \in S} p_n(s' | s_n, a) u^{\pi'}_{n+1} (s_n, a, s') \right\} \\
+            \ge& u^{\pi'}_n(h_n)
+        \end{align*}
+        Which means that, $ \forall \pi \in \Pi^{HR}, \hat u_n(h_n) \ge u^\pi_n(h_n) $.\\
+        Step2:\\
+        $ \forall \epsilon $, we can construct $ \pi' \in \Pi^{HR} $ for which: $ u^{\pi'}_n (h_n) + (N-n) \epsilon \ge \hat u_n(h_n)$.\\
+        To do this, construct a policy $ \pi' = (d'_1, d'_2, \ldots, d'_{N-1}) \in \Pi^{HR} $ by choosing $ d_n(h_n) $ to satisfy
+        \[
+            \sum^{}_{a \in A_{S_t}} q_{d'_n(h_n)}(a) \left\{ r_n(s_n, a) + \sum^{}_{s'\in S} p_n(s' | s_n, a) \hat u_{n+1}(s_n, a, s') \right\} + \epsilon \ge \hat u_n(h_n). 
+        \]
+        
+        First, we have $ u^{\pi'}_N(h_N) = u_N(h_N) $.\\
+        Then, we assume that $ u^{\pi'}_t(h_t) + (N-t) \epsilon \ge u_t(h_t) $ for $ t = n+1, \ldots, N $.
+        \begin{align*}
+            u^{\pi'}_n(h_n) =& \sum^{}_{a} q_{d'_n(h_n)} (a) \left\{ r_n(s_n, a) + \sum^{}_{s' \in S} p_n(s' | s_n, a) u^{\pi'}_{n+1}(s_n, a, s') \right\}\\
+            \ge& \sum^{}_{a} q_{d'_n(h_n)} (a) \left\{ r_n(s_n, a) + \sum^{}_{s' \in S} p_n(s' | s_n, a) \hat u_{n+1}(s_n, a, s') \right\} - (N-n-1)\epsilon\\
+            \ge& \hat u_n(h_n) - (N - n) \epsilon
+        \end{align*}
+        Step3:
+        $ u^*_n(h_n) + (N-n) \epsilon \ge u^{\pi'}_n(h_n) + (N-n) \epsilon \ge u_n(h_n) \ge u^*_n(h_n) $.
+    \end{proof}
+\end{definition}
+
+\begin{theorem}
+    Suppose $ u^*_t, t = 1, \ldots, N $ are solutions of the optimality equation ($ \max $ version). 
+    Then we can construct a corresponding policy $ \pi^*  = (d^*_1, d^*_2, \ldots, d^*_{N-1}) \in \Pi^{HD}$ satisfies
+    \[
+        d^*_t(h_t) \in \arg\max_{a \in A_{s_t}} \left\{ r_t(s_t, a) + \sum^{}_{s' \in S} p_t(s' | s_t, a) u^*_{t+1}(h_t, a, s') \right\}
+    \]
+    for $ t = 1, \ldots, N-1 $.
+    Then
+    \begin{enumerate}
+        \item $ u^{\pi^*}_t(h_t) = u^*_t(h_t), \quad h_t \in H_t $.
+        \item $ v^{\pi^*}_N(s) = v^*_N(s), \quad s \in S$.
+    \end{enumerate}
+    \begin{proof}
+        Clearly, $ u^{\pi^*}_N(h_n) = u^*_N(h_n), h_n \in H_n $. \\
+        We assume that $ u^{\pi^*}_{n+1}(h_{n+1}) = u^*_{n+1}(h_{n+1}) $, 
+        \begin{align*}
+            u^*_n(h_n) =& \max_{a \in A_{s_n}} \left\{ r_n(s_n, a) + \sum^{}_{s' \in S} p_n(s' | s_n, a) u^*_{n+1} (h_n, a, s') \right\} \\
+            =& r_n(s_n, d^*_n(h_n)) + \sum^{}_{s' \in S} p_n(s' | s_n, d^*_n(h_n)) u^*_{n+1} (h_n, d^*_n(h_n), s')\\
+            =& u^{\pi^*}_n(h_n)
+        \end{align*}
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}
+    Let $ \epsilon > 0 $ be arbitrary and suppose $ u^*_t, t = 1, \ldots, N $ are solutions of the optimality equation ($ \sup $ version). 
+    Then we can construct a corresponding policy $ \pi^\epsilon  = (d^\epsilon_1, d^\epsilon_2, \ldots, d^\epsilon_{N-1}) \in \Pi^{HD}$ satisfies
+    \[
+        \left\{ r_t(s_t, d^\epsilon_t) + \sum^{}_{s' \in S} p_t(s' | s_t, d^\epsilon_t) u^*_{t+1}(h_t, d^\epsilon_t, s') \right\} + \frac{\epsilon}{N-1} 
+    \]
+    \[
+        \ge \sup_{a \in A_{s_t}} \left\{ r_t(s_t, a) + \sum^{}_{s' \in S} p_t(s' | s_t, a) u^*_{t+1}(h_t, a, s') \right\}
+    \]
+    for $ t = 1, \ldots, N-1 $.
+    Then
+    \begin{enumerate}
+        \item $ u^{\pi^\epsilon}_t(h_t) + (N-t) \frac{\epsilon}{N-1} \ge u^*_t(h_t), \quad h_t \in H_t $.
+        \item $ v^{\pi^\epsilon}_N(s) + \epsilon = v^*_N(s) , \quad s \in S$.
+    \end{enumerate}
+    The proof is analogous.
+\end{theorem}
+
+
