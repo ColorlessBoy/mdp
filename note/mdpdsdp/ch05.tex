@@ -1,0 +1,96 @@
+% Chapter05 Infinite-Horizon Models: Foundations, Markov Decision Processes Discrete Stochastic Dynamic Programming
+
+
+\section{Infinite-Horizon Models: Foundations}%
+\label{sec:infinite_horizon_models_foundations}
+
+\begin{itemize}
+    \item S is finite or countable.
+    \item stationary policy: $ d^\infty = (d, d, \ldots) $ 
+\end{itemize}
+
+\subsection{THE VALUE OF A POLICY}%
+\label{sub:the_value_of_a_policy}
+
+\begin{enumerate}
+    \item \textbf{Expected total reward} of policy $ \pi \in \Pi^{HR} $:
+        \begin{equation}
+            v^\pi(s) = \lim_{n \to \infty} \mathbb{E}^\pi_S \left\{ \sum^{N}_{t=1} r(X_t, Y_t) \right\} = \lim_{n \to \infty} v^\pi_{n+1}(s)
+        \end{equation}
+        If the limit exists and when interchanging the limits and expectation is valid, we have
+        \begin{equation}
+            v^\pi(s) = \mathbb{E}^\pi_S \left\{ \sum^{\infty}_{t=1} r(X_t, Y_t) \right\}
+        \end{equation}
+
+    \item \textbf{Expected total discounted reward} of policy $ \pi \in \Pi^{HR} $:
+        \begin{equation}
+            v^\pi_\lambda(s) = \lim_{n \to \infty} \mathbb{E}^\pi_S \left\{ \sum^{n}_{t=1} \lambda^{t-1} r(X_t, Y_t) \right\}
+        \end{equation}
+        For $ 0 \le \lambda \le 1 $, the limits exists when $ \sup_{s \in S} \sup_{a \in A_s} \left| r(s, a) \right| = M < \infty$. When the limit exists and interchainging the limit and expectation are valid, we have
+        \begin{equation}
+            v^\pi_\lambda(s) = \mathbb{E}^\pi_S \left\{ \sum^{\infty}_{t=1} \lambda^{t-1} r(X_t, Y_t) \right\}
+        \end{equation}
+    \item \textbf{Average reward or gain} of policy $ \pi \in \Pi^{HR} $:
+        \begin{equation}
+            g^\pi(s) = \lim_{n \to \infty} \frac{1}{n} \mathbb{E}^\pi_S \left\{ \sum^{n}_{t=1} r(X_t, Y_t) \right\} = \lim_{n \to \infty} \frac{1}{n} v^\pi_{n+1}(s)
+        \end{equation}
+        If the limit doesn't exist, we define:
+        \[
+            g^\pi_-(s) = \liminf_{n \rightarrow \infty} \frac{1}{n} v^\pi_{n+1}(s),\quad
+            g^\pi_+(s) = \limsup_{n\rightarrow\infty} \frac{1}{n} v^\pi_{n+1}(s).
+        \]
+\end{enumerate}
+
+\subsection{MARKOV POLICIES}%
+\label{sub:markov_policies}
+
+\begin{theorem}
+    $ \forall \pi = (d_1, d_2, \ldots) \in \Pi^{HR} $. Then, for each $ s_1 \in S_1 $, $ \exists \pi' = (d_1', d_2', \ldots) \in \Pi^{MR} $, satisfying
+    \begin{equation}
+        \forall t,\quad P^{\pi'} \left\{ X_t = s', Y_t = a | X_1 = s_1 \right\} = P^\pi \left\{ X_t = s', Y_t = a | X_1 = s_1 \right\}
+    \end{equation}
+    \begin{proof}
+        We construct the randomized Markov decision rule $ d'_t \in \pi' $ by
+        \[
+            q_{d'_t(s')}(a) = P^\pi \left\{ Y_t = a | X_t = s', X_1 = s_1 \right\}
+        \]
+        Then,
+        \[
+            P^{\pi'} \left\{ Y_t = a | X_t = s' \right\}
+            = P^{\pi'} \left\{ Y_t = a | X_t = s', X_1 = s_1 \right\}
+            = P^{\pi} \left\{ Y_t = a | X_t = s', X_1 = s_1 \right\}
+        \]
+        We use indunction method. Clearly the theorem holds with $ t = 1 $. We assume that the theorem holds for $ t = 1, 2, \ldots, n-1 $. Then,
+        \begin{align*}
+            P^\pi \left\{ X_n = s' | X_1 = s_1 \right\}
+            =& \sum^{}_{s \in S} \sum^{}_{a \in A_s} P^\pi \left\{ X_{n-1} = s, Y_{n-1} = a | X_1 = s_1 \right\} p(s' | s, a)\\
+            =& \sum^{}_{s \in S} \sum^{}_{a \in A_s} P^{\pi'} \left\{ X_{n-1} = s, Y_{n-1} = a | X_1 = s_1 \right\} p(s' | s, a)\\
+            =& P^{\pi'} \left\{ X_n = s' | X_1 = s_1 \right\}\\
+            P^{\pi'} \left\{ X_n = s', Y_n = a | X_1 = s_1 \right\} 
+            =& P^{\pi'} \left\{ Y_n = a | X_n = s' \right\} P^{\pi'} \left\{ X_n = s' | X_1 = s_1 \right\}\\
+            =& P^{\pi} \left\{ Y_n = a | X_n = s', X_1 = s_1 \right\} P^{\pi} \left\{ X_n = s' | X_1 = s_1 \right\}\\
+            =& P^{\pi} \left\{ X_n = s', Y_n = a | X_1 = s_1 \right\}
+        \end{align*}
+    \end{proof}
+\end{theorem}
+Note that, in the above theorem, $ \pi' $ depends on the initial state $ X_1 $.
+When the state at decision epoch 1 is chosen according to a probability distribution, 
+then $ \pi' $ is depended on the distribution intead of $ X_1 = s_1 $.
+\begin{corollary}
+    $ \forall \mathcal{D}_1 \sim X_1, \pi \in \Pi^{HR}, \exists \pi' \in \Pi^{MR} $ for which
+    \[
+        P^{\pi'} \left\{ X_t = s', Y_t = a \right\} = P^{\pi} \left\{ X_t = s', Y_t = a \right\}
+    \]
+\end{corollary}
+
+Noting that
+\begin{equation}
+    \begin{aligned}
+        v^\pi_N(s) =& \sum^{N-1}_{t=1} \sum^{}_{s' \in S} \sum^{}_{a \in A_{s'}} 
+        r(s', a) P^\pi \left\{ X_t = s', Y_t = a | X_1 = s_1 \right\} \\
+                    &+ \sum^{}_{s' \in S} \sum^{}_{a \in A_{s'}} r_N(s') P^\pi \left\{ X_N = s', Y_N = a | X_1 = s_1 \right\} \\
+        v^\pi_\lambda(s) =& \sum^{\infty}_{t=1} \sum^{}_{s' \in S} \sum^{}_{a \in A_{s'}} 
+        \lambda^{t-1} r(s', a) P^\pi \left\{ X_t = s', Y_t = a | X_1 = s_1 \right\}
+    \end{aligned}
+\end{equation}
+

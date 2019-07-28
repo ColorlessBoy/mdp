@@ -1,0 +1,124 @@
+% Chapter06 Discounted Markov Decision Problems, Markov Decision Processes Discrete Stochastic Dynamic Programming.
+
+\section{Discounted Markov Decision Problems}%
+\label{sec:discounted_markov_decision_problems}
+
+Assumptions in this chapter:
+\begin{enumerate}
+    \item Stationary rewards and transition probabilities; $ r(s, a) $ and $ p(s' | s, a) $ do not vary from decision epoch to decision epoch.
+    \item Bounded rewards; $ \left| r(s, a) \right| \le M < \infty $.
+    \item Discount factor $ \lambda $.
+    \item Discrete state spaces.
+\end{enumerate}
+
+\subsection{POLECY EVALUATION}%
+\label{sub:polecy_evaluation}
+
+\[
+    v^*_\lambda(s) = \sup_{\pi \in \Pi^{HR}} v^\pi_\lambda(s) = \sup_{\pi \in \Pi^{MR}} v^\pi_\lambda(s)
+\]
+Let $ \pi = (d_1, d_2, \ldots) \in \Pi^{MR} $,then 
+\[
+    v^\pi_\lambda(s_1) = \mathbb{E}^\pi_{s_1} \left\{ \sum^{\infty}_{t=1} \lambda^{t-1} r(X_t, Y_t) \right\}
+    = r_{d_1} + \lambda P_{d_1} v^{\pi' = \left\{ d_2, d_3, \ldots \right\}}_\lambda
+\]
+Let $ d^\infty = (d, d, \ldots) $, then $ v^{d^\infty}_\lambda(s_1) = r_d(s_1) + \lambda P_d v^{d^\infty}_\lambda $. \\
+Let $ \forall v \in V, L_d v = r_d + \lambda P_d v $, then $ v^{d^\infty}_\lambda = L_d v^{d^\infty}_\lambda $, which means $ v^{d^\infty}_\lambda $ is a fixed point of $ L_d $ in V.
+
+\begin{theorem}
+Suppose $ 0 \le \lambda < 1 $. Then $ \forall d^\infty $ with $ d \in D^{MR} $, $ \vec v^{d^\infty}_\lambda $ is the unique solution in V of $ \vec v = r_d + \lambda P_d \vec v $, and $ \vec v^{d^\infty}_\lambda = {(I - \lambda P_d)}^{-1} r_d $.
+    \begin{proof}
+        Key theorem:
+    $ \Arrowvert P_d \Arrowvert = 1 $ and $ \sigma (\lambda P_d) \le \Arrowvert \lambda P_d \Arrowvert = \lambda \le 1$, then $ {(I - \lambda P_d)}^{-1} $ exists.
+        \[
+            \vec v = {(I - \lambda P_d)}^{-1} r_d = \sum^{\infty}_{t=1} \lambda^{t-1} P^{t-1}_d r_d = \vec v^{d^\infty}_\lambda
+        \]
+    \end{proof}
+\end{theorem}
+
+\begin{lemma}
+    \begin{enumerate}
+        \item $ \vec u \succeq \vec 0 \Rightarrow {(I - \lambda P_d)}^{-1} \vec u \succeq \vec u \succeq \vec 0 $
+        \item $ \vec u \succeq \vec v \Rightarrow {(I - \lambda P_d)}^{-1} \vec u \succeq {(I - \lambda P_d)}^{-1} \vec v $
+        \item $ \vec u \succeq \vec 0 \Rightarrow \vec u^T {(I - \lambda P_d)}^{-1} \succeq \vec u^T $
+    \end{enumerate}
+\end{lemma}
+
+\subsection{OPTIMALITY EQUATIONS}%
+\label{sub:optimality_equations}
+
+Optimality equations or Bellamn equations:
+\[
+    v(s) = \sup_{a \in A_s} \left\{ r(s, a) + \sum^{}_{s' \in S} \lambda p(s' | s, a) v(s') \right\}
+\]
+
+\begin{lemma}
+    $ \forall v \in V, 0 \le \lambda < 1, \sup_{d \in D^{MD}} \left\{ r_d + \lambda P_d v \right\}
+    = \sup_{d \in D^{MR}} \left\{ r_d + \lambda P_d v \right\}$ 
+    \begin{proof}
+        First, $ D^{MD} \subset D^{MR} $, so $ \sup_{d \in D^{MD}} \left\{ r_d + \lambda P_d v \right\}
+    \preceq \sup_{d \in D^{MR}} \left\{ r_d + \lambda P_d v \right\} $.
+    Second, $ \forall d^{MR} \in D^{MR} $,
+    \[
+        \sum^{}_{a \in A_s} q_{d^{MR}}(a) \left[ r(s, a) + \sum^{}_{s' \in S} \lambda p(s' | s, a) v(s') \right]
+        \le \sup_{a \in A_s} \left\{ r(s, a) + \sum^{}_{s' \in S} \lambda p(s'|s, a) v(s') \right\}
+    \]
+    which means,
+    \[
+        r_{d^{MR}} +  \lambda P_{d^{MR}} v \preceq \sup_{d \in D^{MD}} \left\{ r_d + \lambda P_d v \right\}
+        \Rightarrow \sup_{d \in D^{MR}}\left\{ r_d + \lambda P_d v \right\}
+        \preceq \sup_{d \in D^{MD}}\left\{ r_d + \lambda P_d v \right\}
+    \]
+    
+    \end{proof}
+\end{lemma}
+
+\begin{definition}
+    (Bellman operator).
+    \begin{equation}
+        \forall v \in V, \mathcal{L} v = \sup_{d \in D^{MD}} \left\{ r_d + \lambda P_d v \right\}
+    \end{equation}
+    If the supremum is attained for all $ v \in V $, we define $ L $ by
+    \begin{equation}
+        \forall v \in V, Lv = \max_{d \in D^{MD}}\{r_d + \lambda P_d v\}
+    \end{equation}
+\end{definition}
+
+\begin{theorem}
+    Suppose there exists a $ v \in V $ for which
+    \begin{enumerate}
+        \item $ v \succeq \mathcal{L} v \Rightarrow v \succeq v^*_\lambda $;
+        \item $ v \preceq \mathcal{L} v \Rightarrow v \preceq v^*_\lambda$;
+        \item $ v = \mathcal{L} v \Rightarrow v $ is unique and $ v = v^*_\lambda $.
+    \end{enumerate}
+    \begin{proof}
+        First, we proof 1.\\
+        $ \forall \pi = (d_1, d_2, \ldots) \in \Pi^{MR} $,
+        \begin{align*}
+            v \succeq& \sup_{d \in D^{MD}} \left\{ r_d + \lambda P_d v \right\} = \sup_{d \in D^{MR}} \left\{ r_d + \lambda P_d v \right\} \\
+            \succeq& r_{d_1} + \lambda P_{d_1} v = \sum^{n}_{t=1} {(\lambda P^\pi)}^{k-1} r_{d_t} + {(\lambda P^\pi)}^n v\\
+            v - v^\pi_\lambda \succeq& {(\lambda P^\pi)}^n v - \sum^{\infty}_{t = n+1} {(\lambda P^\pi)}^{t-1} r_{d_t} \\
+            \succeq& - \lambda^n \Arrowvert v \Arrowvert_{\infty} \cdot \vec e
+            - \lambda^n \cdot \frac{M}{1-\lambda} \cdot \vec e
+        \end{align*}
+        Because $ r $ is bounded, so $ \forall \epsilon, \exists N $, when $ n \ge N $, we have
+        \[
+            v \succeq v^\pi_\lambda - \epsilon \cdot \vec e
+        \]
+        \[
+            v \succeq \sup_{\pi \in \Pi^{MR}} v^\pi_\lambda = \sup_{\pi \in \Pi^{HR}} v^\pi_\lambda = v^*_\lambda
+        \]
+        Second, we proof 2.\\
+        If $ v \preceq \mathcal{L} v $, by definition of $ \sup $, we have
+        \[
+            \forall \epsilon, \exists d \in D^{MD}, v \preceq r_d + \lambda P_d v + \epsilon \cdot \vec e 
+        \]
+        \[
+            \Rightarrow v \preceq {(I - \lambda P_d)}^{-1}(r_d + \epsilon \cdot \vec e)
+        = v^{d^\infty}_{\lambda} + {(1 - \lambda)}^{-1} \epsilon \cdot \vec e
+    \preceq \sup_{\pi \in \Pi^{HR}} v^\pi_{\lambda} + {(1-\lambda)}^{-1} \epsilon \cdot \vec e
+        \]
+    \end{proof}
+\end{theorem}
+
+

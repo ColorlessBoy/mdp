@@ -73,7 +73,7 @@ Definition:
 \begin{enumerate}
     \item $ \pi = (d_1, d_2, \ldots, d_{N-1}) \in \Pi^{HR} $
     \item Define: $ u^\pi_t(h_t) = \mathbb{E}^\pi_{h_t} \left\{ \sum^{N-1}_{n=t} r_n(X_n, Y_n) + r_N(X_N) \right\} $,
-        ($ u^\pi_t: H_t \rightarrow \mathbb{R} $). And we define $ U^\pi_N(h_N) = r_N(s_N) $.
+        ($ u^\pi_t: H_t \rightarrow \mathbb{R} $). And we define $ u^\pi_N(h_N) = r_N(s_N) $.
     \item Finite horizon-policy evaluation algorithm ($ \pi \in \Pi^{HD} )$:
         \begin{align*}
             \label{eq:}
@@ -92,16 +92,16 @@ Definition:
         \end{proof}
      \item Finite horizon-policy evaluation algorithm ($ \pi \in \Pi^{HR} )$:
          \[
-             \hat u^\pi_t(h_t) = \sum^{}_{a \in A_{s_t}} q_{d_t(h_t)} (a) \left\{ r_t(s_t, d_t(h_t)) + \sum^{}_{s' \in S} p_t(s' | s_t, d_t(h_t)) \hat u^\pi_{t+1} (h_t, d_t(h_t), s'). \right\}
+             \hat u^\pi_t(h_t) = \sum^{}_{a \in A_{s_t}} q_{d_t(h_t)} (a) \left\{ r_t(s_t, a) + \sum^{}_{s' \in S} p_t(s' | s_t, a) \hat u^\pi_{t+1} (h_t, a, s'). \right\}
          \]
-     \item Finite horizon-policy evaluation algorithm ($ \pi \in \Pi^{MR} )$:
+     \item Finite horizon-policy evaluation algorithm ($ \pi \in \Pi^{MD} )$:
          \[
              \hat u^\pi_t(s_t) = r_t(s_t, d_t(s_t)) + \sum^{}_{s' \in S} p_t(s' | s_t, d_t(s_t)) \hat u^\pi_{t+1} (s').
          \]
      \item The computation complexity. There are $ K $ states and $ L $ actions, then:
          \begin{itemize}
-         \item If $ \pi \in \Pi^{HD} $, then requiring $ K^2 \sum^{N-1}_{i=0} {(KL)}^i $ multiplications.
-         \item If $ \pi \in \Pi^{MD} $, then requiring $(N-1)K^2$ multiplications.
+         \item If $ \pi \in \Pi^{HD} $, then requiring $ K \sum^{N-1}_{i=0} {(KL)}^i $ multiplications.
+         \item If $ \pi \in \Pi^{MD} $, then requiring $(N-1)K^2L$ multiplications.
          \end{itemize}
 \end{enumerate}
 
@@ -150,7 +150,11 @@ When minimizing costs instead of maximizing rewards, we sometimes refer to $ u^*
             \ge& \hat u_n(h_n) - (N - n) \epsilon
         \end{align*}
         Step3:
-        $ u^*_n(h_n) + (N-n) \epsilon \ge u^{\pi'}_n(h_n) + (N-n) \epsilon \ge u_n(h_n) \ge u^*_n(h_n) $.
+        $ u^*_n(h_n) + (N-n) \epsilon \ge u^{\pi'}_n(h_n) + (N-n) \epsilon \ge u_n(h_n) \ge u^*_n(h_n) $.\\
+        The lefting question is 
+        \[
+            \int^{}_{a \in A_{s_n}} q_{d'_n(h_n)} (a) \left\{ r_n(s_n, a) + \sum^{}_{s' \in S} p_n(s' | s_n, a) u^{\pi'}_{n+1} (s_n, a, s') \right\} da\\
+        \]
     \end{proof}
 \end{definition}
 
@@ -172,13 +176,14 @@ When minimizing costs instead of maximizing rewards, we sometimes refer to $ u^*
         \begin{align*}
             u^*_n(h_n) =& \max_{a \in A_{s_n}} \left\{ r_n(s_n, a) + \sum^{}_{s' \in S} p_n(s' | s_n, a) u^*_{n+1} (h_n, a, s') \right\} \\
             =& r_n(s_n, d^*_n(h_n)) + \sum^{}_{s' \in S} p_n(s' | s_n, d^*_n(h_n)) u^*_{n+1} (h_n, d^*_n(h_n), s')\\
+            =& r_n(s_n, d^*_n(h_n)) + \sum^{}_{s' \in S} p_n(s' | s_n, d^*_n(h_n)) u^{\pi^*}_{n+1} (h_n, d^*_n(h_n), s')\\
             =& u^{\pi^*}_n(h_n)
         \end{align*}
     \end{proof}
 \end{theorem}
 
 \begin{theorem}
-    Let $ \epsilon > 0 $ be arbitrary and suppose $ u^*_t, t = 1, \ldots, N $ are solutions of the optimality equation ($ \sup $ version). 
+    Let $ \epsilon > 0 $ be arbitrary and suppose $ u^*_t, t = 1, \ldots, N $ are solutions of the optimality equation ($ \sup $ version, $ a $ is continuous). 
     Then we can construct a corresponding policy $ \pi^\epsilon  = (d^\epsilon_1, d^\epsilon_2, \ldots, d^\epsilon_{N-1}) \in \Pi^{HD}$ satisfies
     \[
         \left\{ r_t(s_t, d^\epsilon_t) + \sum^{}_{s' \in S} p_t(s' | s_t, d^\epsilon_t) u^*_{t+1}(h_t, d^\epsilon_t, s') \right\} + \frac{\epsilon}{N-1} 
@@ -195,4 +200,91 @@ When minimizing costs instead of maximizing rewards, we sometimes refer to $ u^*
     The proof is analogous.
 \end{theorem}
 
+\subsection{OPTIMALITY OF DETERMINISTIC MARKOV POLICIES}%
+\label{sub:optimality_of_deterministic_markov_policies}
 
+\begin{theorem}
+    Let $ u^*_t (h_t)$ is the solution of the optimality equations, then:
+    \begin{enumerate}
+        \item $ \forall t = 1, \ldots, N $, $ u^*_t(h_t) $ depends on $ h_t $ only through $ s_t $.
+        \item $ \forall \epsilon > 0 $, there exists an $ \epsilon-optimal $ policy which is deterministic and Markov.
+        \item if $ a $ is reachable, then there exists an optimal policy which is deterministic Markov.
+    \end{enumerate}
+    \begin{proof}
+        First, we have $\forall h_{N-1} \in H_{N-1}, a_{N-1} \in A_{S_{N-1}}, u^*_N(h_N) = u^*_N(s_N) = r_N(s_N) $.  
+        Then, we assume that $ \forall n = t+1, \ldots, N, u^*_n(h_n) = u^*_n(s_n) $.
+        \begin{align*}
+            u^*_t(h_t) =& \sup_{a \in A_{s_t}} \left\{ r_t(s_t, a) + \sum^{}_{s' = S} p_t(s' | s_t, a) u^*_{t+1}(h_t, a, s') \right\} \\
+            =& \sup_{a \in A_{s_t}} \left\{ r_t(s_t, a) + \sum^{}_{s' = S} p_t(s' | s_t, a) u^*_{t+1}(s') \right\} \\
+            =& u^*_t(s_t)
+        \end{align*}
+    \end{proof}
+\end{theorem}
+We have established that
+\[
+    v^*_N(s) = \sup_{\pi \in \Pi^{HR}} v^\pi_N(s) = \sup_{\pi \in \Pi^{MD}} v^\pi_{N}(s), \quad s \in S
+\]
+
+\begin{proposition}
+    Assume $ S $  is finite or countable, and that
+    \begin{enumerate}
+        \item $ A_s $  is finite for each $ s \in S $, or
+        \item $ A_s $ is compact; $ p_t(s' | s, a), r_t(s,a) $ is continuous in $ a $, and $ |r_t(s,a)| \le M < \infty $
+        \item $ A_s $ is compact; $ r_t(s,a) $ is upper semicontinuous in $ a $; and $ |r_t(s,a)| \le M < \infty $; $ p_t(s'|s,a) $ is lower semi-continuous in a.
+    \end{enumerate}
+    Then there exists a deterministic Markovian policy which is optimal. (Which means that $ \sup $ is reachable.)
+\end{proposition}
+
+\subsection{BACKWARD INDUCTION}%
+\label{sub:backward_induction}
+
+The terms ``backward induction'' and ``dynamic programming'' are synonymous.
+Key assumption: optimal action is obtainable.
+
+\begin{definition}
+    \textbf{(The backward induction algorithm).}
+    \begin{enumerate}
+        \item $ \forall s \in S$, let $ \hat u_N(s) = r_N(s)$.
+        \item $ t = N-1 : 1 $, we calculate that
+            \[
+                \forall s \in S, \hat u_t(s) = \max_{a \in A_{s}} \left\{ r_t(s, a) + \sum^{}_{s' \in S} p_t(s' | s, a) \hat u_{t+1}(s') \right\}
+            \]
+    \end{enumerate}
+\end{definition}
+
+\subsection{OPTIMALITY OF MONOTONE POLICIES}%
+\label{sub:optimality_of_monotone_policies}
+
+\subsubsection{Structured Policies}%
+
+\subsubsection{Superadditive Functions}
+
+\begin{definition}
+    Let X and Y be partially ordered sets and $ g: X \times Y \rightarrow \mathbb{R}$.
+    We say g is \textbf{superadditive} if for $ x^+ \ge x^- $ and $ y^+ \ge y^- $, we have
+    \[
+        g(x^+, y^+) + g(x^-, y^-) \ge g(x^+, y^-) + g(x^-, y^+)
+    \]
+\end{definition}
+If the reverse inequality above holds, $ g(x, y) $ is said to be \textbf{subadditive}.
+If superadditive function $ g $ is twice differetiable, we have $ \frac{\partial^2{g(x,y)}}{\partial{x}\partial{y}} \ge 0$.
+\begin{lemma}
+    Let
+    \[
+        f(x) = \max_{y} \left\{ y \in \arg\max_{y' \in Y} g(x, y') \right\}
+    \]
+    If $ g $ is a superadditive function, then $ f(x) $ is monotone nondecreasing in x.
+    \begin{proof}
+        Let corresponding numbers: $ (x^+, y^+)$ and $ (x^-, y^-)$, where $ y^+ = f(x^+)$ and $y^- = f(x^-)$.
+        We assume that $ x^+ > x^- $, but $ y^+ \le y^- $,then:
+        \begin{enumerate}
+            \item By the definition of $ f(x) $, we have $ g(x^-, y^-) \ge g(x^-, y^+) $.
+            \item By the definition of supperadditive, we have $ g(x^+, y^-) + g(x^-, y^+) \ge g(x^-, y^-) + g(x^+, y^+) $.
+            \item Then we have $ g(x^+, y^-) \ge g(x^+, y^+) $, which contradicts with the definition of $ f $.
+        \end{enumerate}
+    \end{proof}
+\end{lemma}
+
+\subsection{Optimality of Monotone Policies}%
+
+Leaving\ldots

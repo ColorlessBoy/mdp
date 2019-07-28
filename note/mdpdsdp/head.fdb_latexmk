@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1563975574 "head.tex" "head.pdf" "head" 1563975575
+["pdflatex"] 1564319418 "head.tex" "head.pdf" "head" 1564319418
   "/etc/texmf/web2c/texmf.cnf" 1561474345 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1511824771 3332 103109f5612ad95229751940c61aada0 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1480098698 1004 54797486969f23fa377b128694d548df ""
@@ -141,12 +141,14 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1520210507 32485 c64754543d8ac501bea6e75e209ea521 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1561474377 2700761 ac0584cc9514ab21918550a6948c4ee2 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1561474395 4128994 f5c978851ccb8f9b02061b85555fbf48 ""
-  "ch04.tex" 1563975574 11102 a9b06c6fed6b1ebc869b39e3ced530c7 ""
-  "head.aux" 1563975574 1008 d2932a9921f5a936b11fec82b0f7877b ""
-  "head.tex" 1563883149 737 7a4c3eac26c1dace239dec6f6a56eadd ""
-  "head.toc" 1563975574 575 fd7a006bb6d4218960d04708da4be1a2 ""
+  "ch04.tex" 1564280924 15442 8ac05151ba7da84f165fb5c40d5d56d0 ""
+  "ch05.tex" 1564306032 4926 aabce9b93d119cd979fe0a0b6b08f965 ""
+  "ch06.tex" 1564319418 5802 bb9e889aa8d7da9312351923ef3cf397 ""
+  "head.aux" 1564319418 2592 383f617f2fc8ea1f6dce2fdf0563092e ""
+  "head.tex" 1564306059 798 a6476ed5bf68130db1274ee3cdeb0e8c ""
+  "head.toc" 1564319418 1475 f8caa83ed5c89d9417eba299e9020b9e ""
   (generated)
   "head.toc"
-  "head.log"
   "head.pdf"
+  "head.log"
   "head.aux"
