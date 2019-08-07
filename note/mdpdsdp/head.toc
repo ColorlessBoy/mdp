@@ -15,5 +15,8 @@
 \contentsline {subsection}{\numberline {5.1}THE VALUE OF A POLICY}{8}
 \contentsline {subsection}{\numberline {5.2}MARKOV POLICIES}{8}
 \contentsline {section}{\numberline {6}Discounted Markov Decision Problems}{10}
-\contentsline {subsection}{\numberline {6.1}POLECY EVALUATION}{10}
+\contentsline {subsection}{\numberline {6.1}POLECY EVALUATION (Stationary Policy)}{10}
 \contentsline {subsection}{\numberline {6.2}OPTIMALITY EQUATIONS}{10}
+\contentsline {subsection}{\numberline {6.3}VALUE ITERATION AND ITS VARIANTS}{13}
+\contentsline {subsubsection}{\numberline {6.3.1}Rates of Convergence}{13}
+\contentsline {subsubsection}{\numberline {6.3.2}Value Iteration}{13}

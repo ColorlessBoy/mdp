@@ -11,7 +11,7 @@ Assumptions in this chapter:
     \item Discrete state spaces.
 \end{enumerate}
 
-\subsection{POLECY EVALUATION}%
+\subsection{POLECY EVALUATION (Stationary Policy)}%
 \label{sub:polecy_evaluation}
 
 \[
@@ -47,7 +47,7 @@ Suppose $ 0 \le \lambda < 1 $. Then $ \forall d^\infty $ with $ d \in D^{MR} $, 
 \subsection{OPTIMALITY EQUATIONS}%
 \label{sub:optimality_equations}
 
-Optimality equations or Bellamn equations:
+Optimality equations or Bellamn equations (in discounted MDP):
 \[
     v(s) = \sup_{a \in A_s} \left\{ r(s, a) + \sum^{}_{s' \in S} \lambda p(s' | s, a) v(s') \right\}
 \]
@@ -121,4 +121,132 @@ Optimality equations or Bellamn equations:
     \end{proof}
 \end{theorem}
 
+The following norm is supremum norm.
+\begin{theorem}
+    \textbf{(Banach Fixed-Point Theorem).} Suppose U is a Banach space and $ T: U \rightarrow U $ is a contraction mappintwith contraction parameter $ \lambda $.Then
+    \begin{enumerate}
+        \item there exists a unique $ v^* $ in U such that $ T v^* = v^* $;
+            \item $ \forall v^0 \in U, \lim_{n \to \infty} v^n = \lim_{n \to \infty} T^n v^0 = v^* $.
+    \end{enumerate}
+    \begin{proof}
+        \begin{align*}
+            \forall m \ge 1,\quad \Arrowvert v^{n+m} - v^n \Arrowvert 
+            \le& \sum^{m-1}_{k=0} \Arrowvert v^{n+k+1} - v^{n+k} \Arrowvert
+            = \sum^{m-1}_{k=0} \Arrowvert T^{n+k} v^1 - T^{n+k} v^{0} \Arrowvert\\
+            \le& \sum^{m-1}_{k=0} \lambda^{n+k} \Arrowvert v^1 - v^{0} \Arrowvert
+            = \frac{\lambda^n (1-\lambda^m) }{(1-\lambda)} \Arrowvert v^1 - v^0 \Arrowvert
+        \end{align*}
+        It follows that $ \left\{ v^n \right\} $ is a Cauchy sequence.
+        From the completeness of $ U $, it follows that $ \left\{ v^n \right\} $ has a limit $ v^\infty \in U $.
+        \begin{align*}
+            0 \le& \Arrowvert T v^\infty - v^\infty \Arrowvert 
+            \le \Arrowvert T v^\infty - v^n \Arrowvert + \Arrowvert v^n - v^\infty \Arrowvert \\
+            =& \Arrowvert Tv^\infty - Tv^{n-1} \Arrowvert + \Arrowvert v^n - v^\infty \Arrowvert
+            \le \lambda \Arrowvert v^\infty - v^{n-1} \Arrowvert + \Arrowvert v^n - v^\infty \Arrowvert
+            \rightarrow 0
+        \end{align*}
+        which means that $ v^\infty$ is a fixed point of T.
+        Let $ u^* $ and $ v^* $ are fixed points of T, then
+        \[
+            \Arrowvert u^* - v^* \Arrowvert = \Arrowvert Tu^* - Tv^* \Arrowvert
+            \le \lambda \Arrowvert u^* - v^* \Arrowvert
+            \Rightarrow u^* = v^*
+        \]
+    \end{proof}
+\end{theorem}
 
+\begin{lemma}
+    Suppose that $ 0 \le \lambda < 1 $; then $ L $ and $ \mathcal{L} $ are contraction mappings on V.
+    \begin{proof}
+        Let $ u, v \in V $,corresponding optimal actions are $ a_u, a_v $, fix $ s \in S $, without loss of generality, let $ Lu(s) \ge Lv(s) $.
+        \begin{align*}
+            0 \le& Lu(s) - Lv(s) = r(s, a_u) + \sum^{}_{s' \in S} \lambda p(s'|s, a_u) u(s') - Lv(s)\\
+            \le& \sum^{}_{s' \in S} \lambda p(s'|s, a_u) (u(s') - v(s')) \le \lambda \Arrowvert u - v \Arrowvert_\infty\\
+        \end{align*}
+        $ \forall s \in S $, we have $ \left| Lu(s) - Lv(s) \right| \le \lambda \Arrowvert u - v \Arrowvert_\infty $ \\
+        The proof of $ \mathcal{L} $ is analogue.
+    \end{proof}
+\end{lemma}
+
+\begin{theorem}
+    Suppose $ 0 \le \lambda < 1 $, $ S $ is finite or countable, and $ r(s,a) $ is bounded.
+    If $ V $ is a complete normed linear space, there exists a unique $ v^* \in V $ satisfying $ Lv^*  = v^* $,
+    and $ v^* = v^*_\lambda $.
+\end{theorem}
+
+\begin{definition}
+    For $ v \in V $, call a decision rule $ d_v \in D^{MD} $ v-improving if
+    \[
+        d_v \in \arg\max_{d \in D^{MD}} \left\{ r_d + \lambda P_d v \right\} \Leftrightarrow L_{d_v} v = Lv
+    \]
+    Clarify:
+    \begin{enumerate}
+        \item $ v^{d^\infty_v}_\lambda $ needs not be greater than or equal to $ v $.
+        \item Even if $ r_{d_v} + \lambda P_{d_v} v \succeq v $, $ v^{d^\infty_v}_\lambda $ exceeds  v in some component only if $ r_{d_v} (s') + \lambda P_{d_v} v(s') > v(s') $.
+        \item $ d^* $, $ v^*_\lambda $-improving, is called conserving decision rule.
+    \end{enumerate}
+\end{definition}
+
+\begin{theorem}
+    If supremum is attained, then $ \exists d \in D^{MD}, d^\infty \in \Pi^{MD}$, satisfies $v^{d^\infty}_\lambda = v^*_\lambda $.
+    So we can calculate that $ v^*_\lambda = \sup_{d \in D^{MD}} v^{d^\infty}_\lambda $.
+    \begin{proof}
+        \[
+            v^*_\lambda = L v^*_\lambda = L_{d_{v^*_\lambda}}v^*_\lambda
+            \Rightarrow v^*_\lambda = v^{d^\infty_{v^*_\lambda}}_\lambda
+        \]
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}
+    Assume S is discrete, and either
+    \begin{enumerate}
+        \item $ A_s $ is finite for each $ s \in S $, or
+        \item $ A_s $ is compact, $ r(s,a) $ is continuous in a for each $ s \in S $, and for each $ s' \in S $ and $ s \in S $, $ p(s' | s, a) $ is continuous in a, or
+        \item $ A_s $ is compact, $ r(s, a) $ is upper semicontinuous in $ a $ for each $ s \in S $, and for each $ s' \in S $ and $ s \in S $, $ p(s' | s, a) $ is lower semicontinuous in a.
+    \end{enumerate}
+    Then there exists an optimal deterministic stationary policy.
+\end{theorem}
+
+If the supremum is not attained in $ \mathcal{L}v $, then optimal policies need not exist.
+\begin{theorem}
+    Support S is finite or countable, then for all $ \epsilon > 0 $ there exists an $ \epsilon-optimal $deterministic stationary policy.
+    \begin{proof}
+        Take $ d_{\epsilon} $ satisfying
+        \[
+            r_{d_{\epsilon}} + \lambda P_{d_{\epsilon}} v^*_{\lambda} \succeq \sup _{d \in D^{MD}} \left\{ r_d + \lambda P_d v^*_{\lambda} \right\} - (1-\lambda)\epsilon \vec{1} = v^*_{\lambda} - (1-\lambda) \epsilon \vec{1}
+        \]
+        \[
+            v^{d^{\infty}_{\epsilon}}_{\lambda} = {(I - \lambda P_{d_{\epsilon}})}^{-1}r_{d_{\epsilon}} \succeq v^*_{\lambda} - (1-\lambda)\epsilon{(I - \lambda P_{d_{\epsilon}})}^{-1} \vec{1} = v^*_{\lambda} - \epsilon \vec{1}
+        \]
+    \end{proof}
+\end{theorem}
+
+\subsection{VALUE ITERATION AND ITS VARIANTS}%
+\label{sub:value_iteration_and_its_variants}
+
+\subsubsection{Rates of Convergence}%
+
+Rate of Convergence
+\begin{enumerate}
+    \item linear convergence or quadratic convergence: $ \Arrowvert y_{n+1} - y^* \Arrowvert \le K \Arrowvert y_n - y^* \Arrowvert^\alpha$;
+    \item superlinearly convergence: $ \limsup_{n \rightarrow \infty} \frac{ \Arrowvert y_{n+1} - y^* \Arrowvert}{ \Arrowvert y_n - y^* \Arrowvert} = 0 $;
+    \item asymptotic average rate of convergence $ \limsup_{n \rightarrow \infty} {\left[ \frac{\Arrowvert y_n - y^* \Arrowvert}{\Arrowvert y_0 - y^* \Arrowvert}  \right]}^{1/n} $
+\end{enumerate}
+
+\subsubsection{Value Iteration}%
+
+\begin{algorithm}[h!]
+    \caption{Value Iteration Algorithm}
+    \begin{algorithmic}
+        \Require{$ \epsilon > 0 $}
+        \Ensure{$ v^0 \in V $}
+        \For{$ n = 1, 2, \ldots $}
+            \State{$\forall s \in S, v^{n+1}(s) = \max_{a \in A_s} \left\{ r(s,a) + \sum^{}_{s' \in S} \lambda p(s'|s, a) v^n(s') \right\} $}
+            \If{$ \Arrowvert v^{n+1} - v^n \Arrowvert < \epsilon (1-\lambda) / (2\lambda)$}
+                \State{break.}
+            \EndIf.
+        \EndFor.
+        \State\Return{$ d_{\epsilon}(s) \in \arg\max_{a \in A_s} \left\{ r(s,a) + \sum^{}_{s' \in S} \lambda p(s' | s, a) v^{n+1}(s') \right\} $}
+    \end{algorithmic}
+\end{algorithm}
