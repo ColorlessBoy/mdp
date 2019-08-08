@@ -250,3 +250,185 @@ Rate of Convergence
         \State\Return{$ d_{\epsilon}(s) \in \arg\max_{a \in A_s} \left\{ r(s,a) + \sum^{}_{s' \in S} \lambda p(s' | s, a) v^{n+1}(s') \right\} $}
     \end{algorithmic}
 \end{algorithm}
+
+\begin{theorem}
+    $ {(d_{\epsilon})}^{\infty} $ is $ \epsilon-optimal $.
+    \begin{proof}
+        \[ \Arrowvert v^{n+1} - v^n \Arrowvert = \Arrowvert Lv^n - Lv^{n-1} \Arrowvert \le \lambda^{n-1} \Arrowvert v^1 - v^0 \Arrowvert \]\\
+        so 
+        \[ \exists N, \forall n > N \ge 1 + \log\left( \frac{\epsilon(1-\lambda)}{\lambda^2 \Arrowvert v^1 - v^0 \Arrowvert}  \right), \Arrowvert v^{n+1} - v^n \Arrowvert < \epsilon(1-\lambda)/(2\lambda). \]\\
+        \begin{align*}
+            \Arrowvert v^{d^{\infty}_\epsilon} - v^{n+1} \Arrowvert
+            =& \Arrowvert L_{d_{\epsilon}} v^{d_{\epsilon}^{\infty}} - v^{n+1} \Arrowvert\\
+            \le& \Arrowvert L_{d_{\epsilon}} v^{d_{\epsilon}^{\infty}} - L_{d_{\epsilon}} v^{n+1} \Arrowvert
+            + \Arrowvert L v^{n+1}- L v^{n} \Arrowvert\\
+            \le& \lambda\Arrowvert v^{d_{\epsilon}^{\infty}} - v^{n+1} \Arrowvert
+            + \lambda\Arrowvert v^{n+1}- v^{n} \Arrowvert\\
+            \Arrowvert v^{d^{\infty}_\epsilon} - v^{n+1} \Arrowvert
+            \le& \frac{\lambda}{1-\lambda} \Arrowvert v^{n+1} - v^{n} \Arrowvert.\\
+            Analogously,& \Arrowvert v^{n+1}- v^* \Arrowvert \le \frac{\lambda}{1-\lambda} \Arrowvert v^{n+1}-v^{n} \Arrowvert.\\
+            \Arrowvert v^{d^{\infty}_\epsilon} - v^{*} \Arrowvert
+            \le& \Arrowvert v^{d^{\infty}_\epsilon} - v^{n+1} \Arrowvert +
+            \Arrowvert v^{n+1} - v^{*} \Arrowvert \le \epsilon
+        \end{align*}
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}
+    \textbf{(monotone).}
+    If $ u \succeq v$, then $ Lu \succeq Lv $.
+    \begin{proof}
+        \begin{align*}
+            Lu - Lv =& \max_{d \in D^{MD}} (r_d + \lambda P_{d} u) - \max_{d \in D^{MD}} (r_d + \lambda P_{d} v)\\
+            =& \max_{d \in D^{MD}} (r_d + \lambda P_{d} u) - (r_{d_{v}} + \lambda P_{d_{v}} v)\\
+            \succeq& (r_{d_{v}}+ \lambda P_{d_{v}} u) - (r_{d_{v}} + \lambda P_{d_{v}} v)\\
+            =& \lambda P _{d_{v}} (u - v) \succeq \vec{0}
+        \end{align*}
+    \end{proof}
+\end{theorem}
+
+Therefore, if $ Lv^0 \succeq(\preceq) v^0 $, then value iteration converges monotonically to $ v^* $.
+
+\begin{theorem}
+    \textbf{(Convergence of value iteration).}
+    \begin{enumerate}
+        \item $ \Arrowvert v^{n+1} - v^*_\lambda \Arrowvert = \Arrowvert Lv^n - Lv^*_\lambda \Arrowvert \le \lambda \Arrowvert v^n - v^*_\lambda \Arrowvert $
+    \item $ \frac{\Arrowvert v^{n} - v^*_\lambda \Arrowvert}{\Arrowvert v^0 - v^*_\lambda \Arrowvert} \le \lambda^{n} \Rightarrow \limsup_{n \rightarrow\infty} {\left[ \frac{\Arrowvert v^{n} - v^*_\lambda \Arrowvert}{\Arrowvert v^0 - v^*_\lambda \Arrowvert}\right]}^{1/n} \le \lambda$ 
+        \item $ \Arrowvert v^n - v^*_{\lambda} \Arrowvert \le \frac{\lambda^n}{1-\lambda} \Arrowvert \lambda^1 - \lambda^0 \Arrowvert$
+    \end{enumerate}
+    If we want change inequality into equality, we need $ v^0 \succeq(\preceq) v^* $ and $ v^1 - v^* = \lambda(v^0 - v^*) $
+\end{theorem}
+
+\subsection{POLICY ITERATION}%
+\label{sub:policy_iteration}
+
+\begin{algorithm}[h!]
+    \caption{Policy Iteration Algorithm}
+    \begin{algorithmic}
+        \State{Select an arbitrary rule $ d_0 \in D^{MD} $}.
+        \For{$ n = 1, 2, \ldots $}
+            \State{Policy evaluation: $ v^n = {(I - \lambda P_{d_{n}})}^{-1} r_{d_{n}} $}
+            \State{Policy improvement: $ d_{n+1} \in \arg\max_{d \in D^{MD}} \left\{ r_d + \lambda P_d v^n \right\} $}
+            \If{$ d_{n+1} = d_{n} $}
+                \State{break.}
+            \EndIf.
+        \EndFor.
+    \end{algorithmic}
+\end{algorithm}
+
+\begin{proposition}
+    In policy iteration algorithm $ v^{n+1} \ge v^{n} $.
+    \begin{proof}
+        \[
+           r_{d_{n+1}} + \lambda P _{d_{n+1}}v^n \ge r_{d_n} + \lambda P_{d_{n}} v^n = v^n   
+        \]
+        \[
+            v^{n+1} = {(I - \lambda P_{d_{n+1}})}^{-1} r_{d_{n+1}} \ge v^{n}
+        \]
+    \end{proof}
+\end{proposition}
+
+If states and actions are finite, the algorithm can terminate in finite number of iterations.
+
+\begin{definition}
+    Operator $ B: V \rightarrow V $,
+    \[
+        Bv = \max_{d\in D^{MD}} \left\{ r_d + (\lambda P_d - I)v \right\} = Lv - v.
+    \]
+\end{definition}
+
+\begin{proposition}
+    $ \forall u,v \in V $ and $ d_v \in D_v $.
+    \[
+        Bu \ge Bv + (\lambda P_{d_{v}} - I)(u-v) \Rightarrow
+        (\lambda P_{d_{v}} - I) \in \partial_{v} (Bv)
+    \]
+    \begin{proof}
+        \begin{align*}
+            Bu -Bv =& \max_{d\in D^{MD}} \left\{ r_d + (\lambda P_d - I)u \right\} - \max_{d\in D^{MD}} \left\{ r_d + (\lambda P_d - I)v \right\}\\
+            \succeq& \left\{ r_{d_v} + (\lambda P_{d_v} - I)u \right\} - \left\{ r_{d_v} + (\lambda P_{d_v} - I)v \right\}\\
+            \succeq& (\lambda P_{d_{v}} - I)(u - v) 
+        \end{align*}
+    \end{proof}
+\end{proposition}
+
+\begin{proposition}
+    Suppose the sequence $ \left\{ v^n \right\} $ is obtained from the policy iteration algorithm.
+    Then, for any $ d_{v^{n}} \in D _{v^{n}} $.
+    \[
+        v^{n+1} = v^n - {(\lambda P _{d_{v^{n}}} - I) }^{-1} B v^{n}
+    \]
+    \begin{proof}
+        \begin{align*}
+            v^{n+1} =& {(I - \lambda P_{d_{v^n}})}^{-1} r_{d_{v^{n}}} - v^n + v^n\\
+            =& v^n - {(\lambda P_{d_{v^n}} - I)}^{-1} \left[ r_{d_{v^{n}}} +  {(\lambda P_{d_{v^n}} - I)}v^n \right]\\
+            =& v^n - {(\lambda P _{d_{v^{n}}} - I) }^{-1} B v^{n}
+        \end{align*}
+    \end{proof}
+\end{proposition}
+
+\begin{definition}
+    $ V_B = \left\{ v \in V; Bv \ge 0 \right\} $ ($ v \in V_B \Rightarrow v \preceq v^*$).
+\end{definition}
+\begin{definition}
+    $ Zv = v - {(\lambda P _{d_{v}} - I) }^{-1} B v $.
+\end{definition}
+\begin{lemma}
+    Let $ v \in V_B, d_v \in D_v, v \succeq u $. Then $ Zv \succeq L u, Zv \in V_B, Zv \succeq v$.
+    \begin{proof}
+        \[
+           Zv = v - {(\lambda P _{d_{v}} - I) }^{-1} B v \succeq v + Bv = Lv \succeq L u   
+        \]
+        \[
+            B(Zv) \succeq Bv + (\lambda P_{d_{v}} - I) (Zv - v) = \vec{0}
+        \]
+        \[
+            Zv = v + {(I - \lambda P _{d_{v}}) }^{-1} B v \succeq v 
+        \]
+    \end{proof}
+\end{lemma}
+\begin{theorem}
+    \textbf{(Policy iteration converges monotonically).}
+    \begin{proof}
+        Let $ u^k = L^k v^0 $ and $ v^k = Z^k v_0 $. We inductively show that $ v^k \in V_B $ and $ u^k \le v^k \le v^*_\lambda $.\\
+        First, if $k = 0$, then $ u^0 = v^0 $ and
+        \[
+            Bv^0 \succeq r_{d_{0}} + (\lambda P_{d_0} - I) v^0 = \vec{0},
+        \]
+        therefore, $ v^0 \in V_B $ and $ v^0 \preceq v^*_{\lambda} $. Above all, $ k = 0, u^0 \preceq v^0 \preceq v^*_{\lambda} $.\\
+        Then, we assume $ k \le n $, $ u^k \preceq v^k \preceq v^*_{\lambda} $ and $ B v^k \succeq \vec{0} $.
+        \[
+            v^{n+1} = Z v^n \in V_B \Rightarrow v^{n+1} \preceq v^*_{\lambda}.
+        \]
+        \[
+            v^k \succeq u^k, v^{n+1} = Z v^n \succeq L u^n = u^{n+1}
+        \]
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}
+    \textbf{(Convergence Rate).}
+    If policy iteration's sequence $ \left\{ v^n \right\} $ satisfies
+    $ \Arrowvert P_{d_{v^n}} - P_{d_{v^*_{\lambda}}} \Arrowvert \le K \Arrowvert v^n - v^*_\lambda \Arrowvert $ (for some K),then
+    \[
+        \Arrowvert v^{n+1} - v^*_{\lambda} \Arrowvert \le \frac{K\lambda}{1-\lambda} \Arrowvert v^n - v^*_\lambda \Arrowvert^2
+    \]
+    \begin{proof}
+        Let $ U_n = \lambda P_{d_{v^{n}}-I} $ and $ U_* = \lambda P_{d_{v^*_\lambda}} - I $.then
+        \[
+            Bv^n \succeq B v^*_\lambda + U_* (v^n - v^*_\lambda) = U_* (v^n - v^*_\lambda)
+            \Rightarrow
+            U^{-1}_{n} B v^n \preceq U^{-1}_n U_* (v^n - v^*_\lambda)
+        \]
+        \[
+            0 \preceq v^*_\lambda - v^{n+1} = v^*_\lambda - v^n + U^{-1}_{n}B v^n
+            \preceq U^{-1}_n (U_n - U_*)(v^*_\lambda - v^n)
+        \]
+        \[
+            \Arrowvert v^*_{\lambda} - v^{n+1} \Arrowvert \preceq \Arrowvert U^{-1}_{n} \Arrowvert
+            \Arrowvert U_n - U_* \Arrowvert \Arrowvert v^*_{\lambda} - v^n \Arrowvert \preceq \frac{\lambda}{1-\lambda} \Arrowvert P_{d_{v^n}} - P_{d_{v^*_{\lambda}}} \Arrowvert \Arrowvert v^*_\lambda - v^n \Arrowvert
+        \]
+    \end{proof}
+\end{theorem}
+
+
