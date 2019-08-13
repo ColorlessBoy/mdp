@@ -313,6 +313,7 @@ Therefore, if $ Lv^0 \succeq(\preceq) v^0 $, then value iteration converges mono
                 \State{break.}
             \EndIf.
         \EndFor.
+        \State{\Return{$ d_{n+1} $}}
     \end{algorithmic}
 \end{algorithm}
 
@@ -431,4 +432,313 @@ If states and actions are finite, the algorithm can terminate in finite number o
     \end{proof}
 \end{theorem}
 
+Consider that $ \Arrowvert P_{d_{v^n}} - P_{d_{v^*_{\lambda}}} \Arrowvert \le K \Arrowvert v^n - v^*_\lambda \Arrowvert $ is unsatisfying, for the unkown $ v^*_\lambda $, we can change into a general condition:
+\[
+    \forall u, v \in V, \Arrowvert P_{d_{v}} - P_{d_{u}} \Arrowvert\le K \Arrowvert v - u \Arrowvert 
+\]
+\[
+    \forall u, v \in V, \Arrowvert P_{d_{v}} - P_{d_{v^*_\lambda}} \Arrowvert\le K \Arrowvert v - v^*_\lambda \Arrowvert 
+\]
 
+\subsection{MODIFIED POLICY ITERATION}%
+\label{sub:modified_policy_iteration}
+
+\begin{algorithm}[h!]
+    \caption{Modified Policy Iteration Algorithm (MPI)}
+    \begin{algorithmic}
+        \Require{$ \epsilon > 0, \left\{ m_0, m_2, \ldots \right\} $}.
+        \Ensure{$ v^0 \in V_B $}.
+        \For{$ n = 0, 1, \ldots $}
+            \State{$ d_{n+1} \in \arg\max_{d \in D} \left\{ r_d + \lambda P_d v^n \right\} $}
+            \State{$ u^0_n = r_{d_{n+1}} + \lambda P_{d_{n+1}} v^n $}
+            \If{$ \Arrowvert u^0_n - v^n \Arrowvert < \epsilon(1-\lambda)/(2\lambda) $} {break} \EndIf.
+            \For{$ k = 0, 1, \ldots, m_n $}
+                \State{$ u^{k+1}_n = r_{d_{n+1}}+ \lambda P_{d_{n+1}} u^k_n = L_{d_{n+1}} u^k_n $}
+            \EndFor.
+            \State{($ v^{n+1} = L_{d_{n+1}}^{ m_n + 1 } v^n $) }
+        \EndFor.
+        \State{\Return{$ d_{n+1} $}}
+    \end{algorithmic}
+\end{algorithm}
+
+In policy iteration, we have
+\[
+    v^{n+1} = v^n - {(\lambda P _{d_{v^{n}}} - I) }^{-1} B v^{n} = v^n + \sum^{\infty}_{k = 0} {\left( \lambda P_{d_{n+1}}^k B v^n \right)}
+\]
+\begin{proposition}
+    Modified policy iteration algorithm equals:
+    \[
+        v^{n+1} = v^n - {(\lambda P _{d_{v^{n}}} - I) }^{-1} B v^{n} = v^n + \sum^{m_n}_{k = 0} {\left( \lambda P_{d_{n+1}}^k\right) B v^n }
+    \]
+    \begin{proof}
+        \begin{align*}
+            v^{n+1} =& v^n + \sum^{m_n}_{k=0} {\left( \lambda P_{d_{n+1}} \right)}^k \left[ r_{d_{n+1}} + \lambda P_{d_{n+1}} v^n - v^n \right]\\
+            =& r_{d_{n+1}} + \lambda P_{d_{n+1}}r_{d_{n+1}} + \cdots + {\left(\lambda P_{d_{n+1}}\right)}^{m_n}r_{d_{n+1}} + {\left( \lambda P_{d_{n+1}} \right)}^{m_n + 1} v^n\\
+            =& {(L_{d_{n+1}})}^{m_n+1}v^n
+        \end{align*}
+    \end{proof}
+\end{proposition}
+The preceeding proposition shows that order 0 modified policy iteration eqauals to value iteration, and order $ \infty $ modified policy iteration equals to policy iteration. 
+
+The graph of algorithm: $ Bv $ lines and $ 45-degree $ lines.
+
+Denote the operator $ U^m: V \rightarrow V $, 
+\[
+    U^m v = \max_{d \in D} \sum^{m}_{k=0} {(\lambda P_d)}^k r_d + {(\lambda P_d)}^{m+1}v.
+\]
+Proposition:
+\begin{enumerate}
+    \item $ \Arrowvert U^m u - U^m v \Arrowvert \le \lambda^{m+1} \Arrowvert u - v \Arrowvert $;
+    \item The sequence $ w^{n+1} = U^m w^n $ converges in norm to $ v^*_\lambda $;
+        \begin{proof}
+            Assume $ w^* $ is the fixed point of $ U^m $, and let $ d^* \in D^{MD} $ be the $ v^*_\lambda-improving $ decision rule.
+            \[
+                v^*_\lambda = L^m v^*_\lambda = \sum^{m}_{k=0} {(\lambda P_{d^*})}^k r_{d^*} + {(\lambda P_{d^*})}^{m+1} v^*_\lambda \preceq U^m v^*_\lambda \preceq {(U^m)}^n v^*_\lambda \rightarrow w^*,
+            \]
+            \[
+                w^* = U^m w^* \preceq L^m w^* \rightarrow v^*_\lambda
+            \]
+            
+        \end{proof}
+    \item $ v^*_{\lambda} $ is the unique fixed point of $ U^m $;
+    \item $ \Arrowvert w^{n+1} - v^*_{\lambda} \Arrowvert \preceq \lambda^{m+1} \Arrowvert w^n - v^*_{\lambda} \Arrowvert $
+\end{enumerate}
+
+Denote the MPI operator $ W^m: V \rightarrow V $,
+\[
+    W^m v = v + \sum^{m}_{k=0} {(\lambda P_{d_{v}})}^k Bv
+\]
+
+\begin{lemma}
+    For $ u \in V $ and $ v \in V $ satisfying $ u \succeq v \Rightarrow U^m u \succeq W^m v $. Furthermore, if $ u \in V_B $, then $ W^m u \succeq U^0 v = Lv $.
+    \begin{proof}
+        Let $ d_v \in D $ is $ v-improving $ and $ d_u \in D $ is $ u-improving $. Then
+        \begin{align*}
+            U^m u - W^m v \succeq& \sum^{m}_{k=0} {(\lambda P_{d_{v}})}^k r_{d_v} + {(\lambda P_{d_v})}^{m+1} u - \sum^{m}_{k=0} {(\lambda P_{d_{v}})}^k r_{d_v} - {(\lambda P_{d_v})}^{m+1} v\\
+            =& {(\lambda P_{d_v})}^{m+1} (u - v) \succeq 0.
+        \end{align*}
+        For $ u \in V_B $,
+        \begin{align*}
+            W^m u = u + \sum^{m}_{k=0} {(\lambda P_{d_u})}^k Bu \succeq u + Bu = Lu \succeq r_{d_v} + \lambda P_{d_v}u \succeq Lv
+        \end{align*}
+    \end{proof}
+\end{lemma}
+
+\begin{lemma}
+    $ u \in V_B \Rightarrow w = W^m u \in V_B $.
+    \begin{proof}
+        \begin{align*}
+            Bw \succeq& Bu + (\lambda P_{d_u} - I)(w - u) = Bu + (\lambda P_{d_u} - I) \sum^{m}_{k=0} {(\lambda P_{d_u})}^k Bu\\
+            =& {(\lambda P_{d_u})}^{m+1} Bu \succeq \vec{0}
+        \end{align*}
+    \end{proof}
+\end{lemma}
+
+\begin{theorem}
+    \textbf{(The monotonical convergence of MPI).}
+    \begin{proof}
+        Define three sequence $ \left\{ v^n \right\}, \left\{ y^n \right\}, \left\{ w^n \right\} $ which corresponds to $ W^{m_n}, L $, and $ U^{m_n} $, and $ v^0 = y^0 = w^0 \in V_B $. We will show that $ v^n \in V_B, v^{n+1} \succeq v^n $, and $ w^n \succeq v^n \succeq y^n $.
+
+        According preceeding lemma, $ v^0 \in V_B \Rightarrow v^n \in V_B $.
+        
+        We can get monotonous by $ v^{n+1} = v^n + \sum^{m_n}_{m=0} {(\lambda P_{d_n})}^m B v^n \succeq v^n $.
+
+        By condunction, we assum $ w^n \succeq v^n \succeq y^n $the preceeding lemma also proofs that $ U^{m_n} w^n \succeq W^{m_n} v^{n} \succeq L y^{n} $.
+    \end{proof}
+\end{theorem}
+
+Noting: $ W^{m_n + k} v^n $ can be small than $ W^{m_n} v^n $
+
+\subsubsection{Convergence Rates}%
+\label{ssub:convergence_rates}
+
+\begin{theorem}
+    Suppose $ v^0 \in V_B $ and $ \left\{ v^n \right\} $ is generated by modified policy iteration, $ d_n $ is a $ v^n-improving $ decision rule, and $ d^* $ is a $ v^*_\lambda-improving $ decision rule.
+    \begin{equation}
+        \Arrowvert v^{n+1} - v^*_\lambda \Arrowvert \le
+        \left( \frac{\lambda (1 - \lambda^{m_n})}{1- \lambda} \Arrowvert P_{d_n} - P_{d^*} \Arrowvert + \lambda^{m_n + 1} \right) \Arrowvert v^n - v^*_{\lambda} \Arrowvert.
+    \end{equation}
+    \begin{proof}
+        \begin{align*}
+            0 \le& v^*_{\lambda} - v^{n+1} = v^*_{\lambda} - v^n - \sum^{m_n}_{k=0} {(\lambda P_{d_n})}^k B v^n \\
+            \le& v^*_{\lambda} - v^n + \sum^{m_n}_{k=0} {(\lambda P_{d_n})}^k (I - \lambda P_{d^*}) (v^n - v^*_{\lambda})\\
+            =& \lambda (P_{d_n} - P_{d^*}) \sum^{m_n - 1}_{k = 0} {(\lambda P_{d_n})}^k (v^n - v^*_{\lambda}) - \lambda^{m_n + 1} P^{m_n}_{d_n} P_{d^*} (v^n - v^*_{\lambda})
+        \end{align*}
+        Taking norms yields the result.
+    \end{proof}
+\end{theorem}
+
+If $ \lim_{n \rightarrow \infty} \Arrowvert P_{d_n} - P_{d^*} \Arrowvert = 0 $, then $ \Arrowvert v^{n+1} - v^*_\lambda \Arrowvert \le \left( \lambda^{m_n + 1} + \epsilon \right) \Arrowvert v^n - v^*_\lambda \Arrowvert$.
+
+If $ m_n \rightarrow \infty $, $ \lim\sup_{n \rightarrow \infty} \frac{ \Arrowvert v^{n+1} - v^*_{\lambda} \Arrowvert}{ \Arrowvert v^n - v^*_{\lambda} \Arrowvert} = 0 $.
+
+\subsection{SPANS, BOUNDS, STOPPING CRITERIA, AND RELATIVE VALUE ITEARTION}%
+\label{sub:spans_bounds_stopping_criteria_and_relative_value_iteartion}
+
+\subsubsection{The Span Seminorm}%
+
+\begin{enumerate}
+    \item $ \Lambda(v) = \min_{s \in S} v(s), \Upsilon(v) = \max_{s \in S} v(s) $;
+    \item $ sp(v) = \max_{s \in S} v(s) - \min_{s \in S}v(s) = \Upsilon(v) - \Lambda(v) $
+        \begin{itemize}
+            \item $ \forall v \in V, sp(v) \ge 0 $;
+            \item $ \forall v, u \in V, sp(u+v) \le sp(u) + sp(v) $;
+            \item $ \forall k \in \mathbb{R}, sp(kv) = |k| sp(v) $;
+            \item $ \forall k \in \mathbb{R}, sp(v+ke) = sp(v) $;
+            \item $ sp(v) = sp(-v) $;
+            \item $ sp(v) \le 2 {\Arrowvert v \Arrowvert}_\infty \le 2 {\Arrowvert v \Arrowvert}_2 \le 2 \Arrowvert v \Arrowvert_1 $
+        \end{itemize}
+\end{enumerate}
+
+\begin{proposition}
+    Let $ v \in V, d \in D $. Then $ sp(P_d v) \le \gamma_d sp(v) $,\\
+    $ \gamma_d = \max_{s, s' \in S \times S} \sum^{}_{j \in S} \max \left\{0, P_d(j |s) - P_d(j | s') \right\}$.
+    \begin{proof}
+        Let $ b(s, s'; j) = \min \left\{ P(j | s), P(j | s') \right\} $
+        \begin{align*}
+            sp(Pv) =& \max_{s, s' \in S \times S}\sum^{}_{j \in S} [P(j | s) - b(s, s';j)] v(j) - \sum^{}_{j \in S} [P(j | s') - b(s, s';j)] v(j)\\
+            \le& \max_{s, s' \in S \times S}\sum^{}_{j\in S}[P(j|s) - b(s, s';j)] \Upsilon(v) - \sum^{}_{j\in S} [P(j|s') - b(s,s',j)]\Lambda(v)\\
+            =& \max_{s, s' \in S \times S} \left[ 1 - \sum^{}_{j\in S} b(s, s'; j)\right] sp(v)
+            = \max_{s, s' \in S \times S} \left[1 - \sum^{}_{j \in S} \min\left\{ P(j|s), P(j|s') \right\}\right] sp(v)\\
+            =& \max_{s, s' \in S \times S} \left[ 1 - \sum^{}_{j\in S} (P(j|s) + P(j|s') - |P(j|s)-P(j|s')|)/2 \right] sp(v)\\
+            =& \max_{s, s' \in S \times S} \left[ \frac{1}{2} \sum^{}_{j\in S} |P(j|s)-P(j|s')| \right] sp(v)\\
+            =& \max_{s, s' \in S \times S} \sum^{}_{j\in S} \max\left\{ 0, P(j|s) - P(j|s') \right\} sp(v)
+        \end{align*}
+        $ (\left| x - y \right| = x+y - 2\min(x,y), \max(0, x-y) = x - \min(x,y), \max(0, y-x) = y - \min(x,y))$
+    \end{proof}
+\end{proposition}
+
+$ \exists v' \in V $ such that $ sp(Pv) = sp(v) $:
+\begin{enumerate}
+    \item P's rows are equal $\Rightarrow \gamma_d = 0 \Rightarrow sp(Pv) = 0 = 0 \cdot sp(v)$;
+    \item Let $ s^*, s'^* $ be $ \sum^{}_{j\in S} \max\left\{ 0, P(j|s^*) - P(j|s'^*) \right\} = \max_{s, s' \in S \times S} \sum^{}_{j\in S} \max\left\{ 0, P(j|s) - P(j|s') \right\}$, then $ v(j) = 1_{\left\{ P(j|s^*) > P(j|s'^*) \right\}} $.
+        $ sp(v') = 1 $ and $ sp(Pv) \ge \sum^{}_{j \in S} P(j | s^*) v(j) - \sum^{}_{j\in S} P(j | s'^*) v(j) = \sum^{}_{j \in S} \max\left\{ 0, P(j | s^*) - P(j | s'^*) \right\} = \gamma_d sp(v)$
+\end{enumerate}
+
+$ \gamma_d $ is referred to as the Hajnal measure or delta coefficient of $ P_d $, which upper bounds the subradius (modulus of the second largest eigenvalue) of $ P_d $, $ \sigma_s(P_d) $. $ \gamma_d $ equals to 0 if all rows of $ P_d $ are equal, and equals to 1 if at least two rows of $ P_d $ are orthogonal.
+
+\begin{theorem}
+    Let \textbf{span constraction} $ T: V \rightarrow T $ and suppose there exists an $ \alpha $, $ 0 \le \alpha < 1 $ for which
+    \[
+        sp(Tv - Tu) \le \alpha \cdot sp(v - u)
+    \]
+    then
+    \begin{enumerate}
+        \item $ \exists v^* \in V, sp(Tv^* - v^*) = 0 $ which called \textbf{span fixed point}. Furthermore, $ Tv^* = v^* = v^* + ke $.
+        \item For sequence $ \left\{ v^n \right\} $ by $ v^n = T^n v^0 $, then $ \lim_{n \rightarrow \infty} sp(v^n - v^*) = 0 $.
+        \item $ sp(v^{n+1} - v^*) \le \alpha^n sp(v^0 - v^*) $
+    \end{enumerate}
+\end{theorem}
+
+\subsubsection{Bounds on the Value of a Discounted Markov Decision Process}%
+\label{ssub:bounds_on_the_value_of_a_discounted_markov_decision_process}
+
+\begin{theorem}
+    For $ v \in V, m \ge -1 $, and any $ v-improving $ decision rule $ d_v $,
+    \begin{align*}
+        G_m(v) =& v + \sum^{m}_{i=1} {(\lambda P_{d_v})}^k Bv + \lambda^{m+1}{(1-\lambda)}^{-1} \Lambda (Bv) \vec{1}, \quad \text{nondecreasing in m}\\
+        G^m(v) =& v + \sum^{m}_{k=0} {(\lambda P_{d_{v^*_{\lambda}}})}^k Bv + \lambda^{m+1}{(1-\lambda)}^{-1} \Upsilon(Bv) \vec{1}, \quad \text{nonincreasing in m}\\
+        G_m(v) \le& v^{{(d_v)}^\infty}_\lambda \le v^*_{\lambda} \le G^m(v)
+    \end{align*}
+    \begin{proof}
+        We have $ 0 = B v^*_\lambda \succeq Bv + (\lambda P_{d_v} - I)(v^*_\lambda - v) $.
+        Since that $ {(I - \lambda P_{d_v})}^{-1} \succeq 0 $, 
+        then, $ 0 \succeq v - v^*_\lambda + {(I - \lambda P_{d_v})}^{-1} Bv $.
+        \begin{align*}
+            v^*_\lambda \succeq& v + \sum^{m}_{k=0} {(\lambda P_{d_v})}^k Bv + \sum^{\infty}_{k=m+1} {(\lambda P_{d_v})}^k [\Lambda(Bv)] \vec{1}\\
+            =& v + \sum^{m}_{k=0} {(\lambda P_{d_v})}^k Bv + \frac{\lambda^{m+1}}{1-\lambda} [\Lambda(Bv)]\vec{1}
+        \end{align*}
+        Analoguely, $ Bv \succeq Bv^*_{\lambda} + (\lambda P_{d_{v^*_{\lambda}}} - I)(v - v^*_{\lambda}) \Rightarrow v^*_\lambda \preceq v + {(I - \lambda P_{d_{v^*_{\lambda}}})}^{-1} Bv \preceq v + \sum^{m}_{k=0} {(\lambda P_{d^*_\lambda})}^k Bv + \frac{\lambda^{m+1}}{1-\lambda} [\Upsilon(Bv)] \vec{1}$.
+    \end{proof}
+\end{theorem}
+
+\begin{corollary}
+    \begin{align*}
+        v + {(1-\lambda)}^{-1} \Lambda(Bv) \vec{1}
+        \preceq& v + Bv + \lambda {(1-\lambda)}^{-1} \Lambda(Bv) \vec{1} \preceq v^{d^\infty_v}_\lambda\\
+        \preceq& v^*_\lambda \preceq v+Bv+ \frac{\lambda}{{1-\lambda}} \Upsilon(Bv) \vec{1}\\
+        \preceq& v + {(1-\lambda)}^{-1} \Upsilon(Bv) \vec{1}
+    \end{align*}
+\end{corollary}
+
+\subsubsection{Stopping Criteria}%
+\label{ssub:stopping_criteria}
+
+\begin{proposition}
+    For $ v \in V $ and $ \epsilon > 0 $ that
+    \[
+        sp(Lv-v) = sp(Bv) < \frac{(1-\lambda)}{\lambda} \epsilon
+    \]
+    then,
+    \[
+        \Arrowvert Lv + \frac{\lambda}{1-\lambda} \Lambda(Bv) \vec{e} - v^*_\lambda \Arrowvert < \epsilon
+    \]
+    and 
+    \[
+         \Arrowvert v^{d^\infty_v}_\lambda - v^*_\lambda \Arrowvert < \epsilon
+    \]
+    \begin{proof} ($ w \le x \le y \le z \Rightarrow 0 \le y-x \le z-w $).
+        \[
+            0\preceq v^*_\lambda - v - Bv - \frac{\lambda}{1-\lambda} \Lambda(Bv) \vec{1} \preceq \frac{\lambda}{1-\lambda} sp(Bv) \vec{1}
+        \]
+        Because $ Lv = Bv + v $, therefore we can get the first inequation by taking norms on both side. 
+        Analogously,
+        \[
+            0 \preceq v^*_{\lambda} - v^{d^\infty_v}_{v} \preceq \frac{\lambda}{1-\lambda} sp(Bv) \vec{1}
+        \]
+    \end{proof}
+\end{proposition}
+
+Here is something we need to know
+\[
+    \forall k, \arg\max_{d \in D} \left\{ r_d + \lambda P_d (v + k \vec{1}) \right\}
+    = \arg\max_{d \in D} \left\{ r_d + \lambda P_d v + \lambda k \vec{1} \right\}
+    = \arg\max_{d \in D} \left\{ r_d + \lambda P_d v \right\}
+\]
+\begin{theorem}
+    $ \gamma = \max_{s\in S, a \in A_s, s' \in S, a' \in A_{s'}} \left[ 1- \sum^{}_{j \in S} \min \left[ p(j | s, a), p(j | s', a') \right] \right] $.
+    Then $ \forall u, v \in V, sp(Lv - Lu) \le \lambda \gamma sp(v - u) $.
+    \begin{proof}
+        \begin{align*}
+            sp(Lv - Lu) \le& \max_{s \in S}(L v(s) - L u(s)) - \min_{s \in S} (L v(s) - L u(s)) \\
+            \le&\max_{s \in S}(L_{d_v} v(s) - L_{d_v} u(s)) - \min_{s \in S} (L_{d_u} v(s) - L_{d_u} u(s)) \\
+            =& \max_{s \in S}(P_{d_v}(v - u) (s)) - \min_{s \in S} (\lambda P_{d_u}(v-u) (s)) \\
+            \le& sp\left(\lambda \begin{bmatrix} P_{d_v} \\ P_{d_u} \end{bmatrix} (v-u)\right) \le \lambda \gamma_{d_v, d_u}(v - u) \le \lambda \gamma(v-u) \\
+        \end{align*}
+    \end{proof}
+\end{theorem}
+
+If $ u = Lv $ then $ \forall v \in V, sp(B^2 v) \le \lambda \gamma sp(Bv) $.
+For value iteration,
+\[
+    \Arrowvert v^{n+2} - v^{n+1} \Arrowvert = \Arrowvert B v^{n+1} \Arrowvert = \Arrowvert B^2 v^n \Arrowvert\le \lambda \Arrowvert B v^n \Arrowvert = \lambda \Arrowvert v^{n+1} - v^n \Arrowvert
+\]
+\[
+    sp(v^{n+2} - v^{n+1}) = sp(B^2 v^n) \le \lambda \gamma sp(B v^n) = \lambda \gamma sp(v^{n+1} - v^n)
+\]
+
+We can use $ \gamma' $ instead of $ \gamma $: $ \gamma \le 1 - \sum^{}_{j \in S} \min_{s \in S, a \in A_s} p(j | s, a) = \gamma' $.  
+
+\begin{corollary}
+    Let $ v^0 \in V $, $ \left\{ v^n \right\} $ has been generated using value iteration. Then
+    \begin{enumerate}
+        \item $ \lim_{n \to \infty} sp(v^n - V^*_{\lambda}) = 0 $;
+        \item $ \forall n, sp(v^{n+1} - v^{*}_{\lambda}) \le {(\lambda \gamma)}^{n} sp(v^0 - v^*_{\lambda}) $;
+        \item $ sp(v^{n+1} - v^n) \le {(\lambda \gamma)}^{n} sp(v^1 - v^0) $.
+    \end{enumerate}
+\end{corollary}
+
+In chapter8, the following algorithm is useful.
+\begin{algorithm}
+    \caption{Relative Value Iteration Algorithm}
+    \begin{algorithmic}
+        \Require{$ \epsilon > 0 $}
+        \Ensure{$ u^0 \in V$, choose $ s_0 $ set $ w^0 = u^0 - u^0(s_0) \vec{1} $}
+        \For{$ n = 0, 1, \ldots $}
+            \State{$ u^{n+1}  = Lw^n $}
+            \State{$ w^{n+1} = u^{n+1} - u^{n+1}(s_0) \vec{1} $}
+            \If{$ sp(u^{n+1} - u^{n}) < (1-\lambda)\epsilon/\lambda $} {break}\EndIf.
+        \EndFor.
+        \State{\Return{$ d_\epsilon \in \arg\max_{d \in D} \left\{ r_d + \lambda P_d u^n \right\} $}}
+    \end{algorithmic}
+\end{algorithm}

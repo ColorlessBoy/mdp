@@ -21,3 +21,9 @@
 \contentsline {subsubsection}{\numberline {6.3.1}Rates of Convergence}{13}
 \contentsline {subsubsection}{\numberline {6.3.2}Value Iteration}{14}
 \contentsline {subsection}{\numberline {6.4}POLICY ITERATION}{15}
+\contentsline {subsection}{\numberline {6.5}MODIFIED POLICY ITERATION}{17}
+\contentsline {subsubsection}{\numberline {6.5.1}Convergence Rates}{19}
+\contentsline {subsection}{\numberline {6.6}SPANS, BOUNDS, STOPPING CRITERIA, AND RELATIVE VALUE ITEARTION}{19}
+\contentsline {subsubsection}{\numberline {6.6.1}The Span Seminorm}{19}
+\contentsline {subsubsection}{\numberline {6.6.2}Bounds on the Value of a Discounted Markov Decision Process}{21}
+\contentsline {subsubsection}{\numberline {6.6.3}Stopping Criteria}{21}
