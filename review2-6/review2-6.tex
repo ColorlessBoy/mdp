@@ -1,0 +1,356 @@
+\documentclass{beamer}
+
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{tcolorbox}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\begin{document}
+
+\begin{frame}
+    \title{Review of Chapter2 $ \sim $ Chapter6}
+    \subtitle{Markov Decision Processes:Discrete Stochastic Dynamic Programming}
+    \author{Peng Lingwei}
+    \date{\today}
+    \titlepage.
+\end{frame}
+
+\begin{frame}{Chapter2:Model Formulation}
+    \[
+        Model: \{\mathcal{T}, \mathcal{S}, \mathcal{A}, \underbrace{\mathcal{R}(s, a), \mathcal{P}(s'|s, a)}_{Markovian}\}
+    \]
+    
+    \begin{enumerate}
+        \item $ \mathcal{T} = (1, 2, 3, \ldots) $: finite horizon, infinite horizon;
+        \item $ \tau = (s_1, a_1, r(s_1, a_1), s_2, a_2, r(s_2,a_2), \ldots ) $;
+        \item $ h_t = (s_1, a_1, s_2, a_2, \ldots) \in H_t = \mathcal{S \times A \times S \times A} \ldots$
+        \item $ \mathcal{S, A}$:
+            \begin{itemize}
+                \item finite sets;
+                \item countable infinite sets;
+                \item compact sets of finite dimensional Euclidean space;
+                \item non-empty Borel subsets of complete, seperable metric spaces.
+            \end{itemize}
+        \item $ \int \mathcal{R}(s, a, s') \mathcal{P}(s' | s, a) ds' = \mathcal{R}(s, a)$.
+    \end{enumerate}
+\end{frame}
+\begin{frame}{Chapter2:Model Formulation}
+    \[
+        Decider: \{D^k, \Pi^k, k = \{HR, HD, MR, MD\}\}
+    \]
+    \begin{enumerate}
+        \item $ d \in D^k: d^{HR}(h_t) = P(\mathcal{A}_{s_t}), d^{HD}(h_t) = a_t, d^{MR}(s_t) = P(\mathcal{A}_{s_t}), d^{MD}(s_t) = a_t $;
+        \item $ \pi = (d_1, d_2, \ldots)\in \Pi^K = D^K \times D^K \times \ldots $;
+        \item Stateionary policy: $ \pi_d = (d, d, \ldots) $.
+    \end{enumerate}
+
+    \[
+        \text{Optimality criterion}: \left\{ V^\pi(s), Q^\pi(s, a), V^*, Q^* \right\}
+    \]
+    \begin{enumerate}
+        \item $ V^\pi = \left\{ V^\pi_N, V^\pi_1, V^\pi_\lambda, V^\pi_{avg} \right\} $
+    \end{enumerate}
+
+    \[
+        Model + Decider = \text{Markov Decision Process}
+    \]
+    \[
+        Model + Decider + \text{Optimality criterion} = \text{Markov Decision Problem}
+    \]
+\end{frame}
+
+\begin{frame}[t]{Chapter4:Finite-Horizon Markov Decision Process}
+    \begin{enumerate}
+        \item We only assume that $ \mathcal{S} $ is discrete.
+        \item $ T = \left( 1, 2, \ldots, N-1, N \right) $
+        \item $ \tau = (s_1, a_1, r(s_1, a_1),\ldots, s_{N-1}, a_{N-1}, r(s_{N-1},a_{N-1}), s_N, r(s_N) ) $
+        \item Optimal criterion:
+            \begin{itemize}
+                \item Value function: $ V^\pi_N(s) = \mathbb{E}_{\tau \sim \mathcal{P}} \left\{ \sum^{N-1}_{t=1} r(s_t, a_t) + r_N(s_N) \right\}$;
+                \item Optimal value: $ V^*_N = \sup_{\pi \in \Pi^{HR}} V^\pi_N $;
+                \item Optimal policy $ \pi^* $: $ \forall \pi \in \Pi^{HR}, V^{\pi^*}_N \succeq V^\pi_N $;
+                \item $ \epsilon-Optimal$ policy $ \pi^*_\epsilon $: $ \forall \pi \in \Pi^{HR}, V^{\pi^*_\epsilon}_N + \epsilon \succeq V^\pi_N $.
+            \end{itemize}
+        \item Initial state distribution $ \mathcal{P}_1 = P \left\{ s_1 = s \right\} $, $ V^{\pi, \mathcal{P}_1}_N = \sum^{}_{s=S} v^\pi_N(s) P\left\{ s_1 = s \right\} $.
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}[t]{Policy Evaluation}
+    Define: $ u^\pi_t(h_t) = \mathbb{E}^\pi_{h_t} \left\{ \sum^{N-1}_{n=t} r_n(X_n, Y_n) + r_N(X_N) \right\}, u^\pi_N(h_N) = r(s_N) $.\\
+    For $ \hat{u}^\pi_N (h_N) = u^\pi_N (h, N) = r(s_N) $, we can use backward induction to calculate any policy $ \pi = (d_1, d_2, \ldots, d_{N-1}) $'s value:
+    \begin{enumerate}
+        \item Finite horizon-policy evaluation algorithm ($ \pi \in \Pi^{HR} $):
+        \[
+            \hat u^\pi_t(h_t) = \sum^{}_{a \in A_{s_t}} q_{d_t(h_t)} (a) \left\{ r_t(s_t, a) + \sum^{}_{s' \in S} p_t(s' | s_t, a) \hat u^\pi_{t+1} (h_t, a, s'). \right\}
+        \]
+        \item Finite horizon-policy evaluation algorithm ($ \pi \in \Pi^{MD} $):
+        \[
+            \hat u^\pi_t(s_t) = r_t(s_t, d_t(s_t)) + \sum^{}_{s' \in S} p_t(s' | s_t, d_t(s_t)) \hat u^\pi_{t+1} (s').
+        \]
+    \item $ \pi \in \Pi^{HR}: \sum^{N}_{i=1} {(|\mathcal{S}| |\mathcal{A}|)}^i $;
+    \item $ \pi \in \Pi^{MD}: (N-1) |\mathcal{S}|^2 |\mathcal{A}| $
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}[t]{Optimal Equation}
+    \begin{definition} \textbf{(Optimal equation or bellman equaiton).}
+        \[
+           \hat u_t(h_t) = \sup_{a \in A_{s_t}} \left\{ r_t(s_t, a) + \sum^{}_{s' \in S} p_t(s' | s_t, a) \hat u_{t+1} (h_t, a, s') \right\},
+        \]
+        \[
+            s.t.\ \hat u_N(h_N) = r_N(s_N). 
+        \]
+    \end{definition}
+    \begin{definition}
+        \[
+             u^*_t(h_t) = \sup_{\pi \in \Pi^{HR}} u^\pi_t(h_t) 
+        \]
+    \end{definition}
+    \begin{theorem}
+        \[
+             \forall h_t \in H_t, \hat u_t(h_t) = u^*_t(h_t) 
+        \]
+    \end{theorem}
+\end{frame}
+
+\begin{frame}[t]{Chapter4:Infinite-Horizon Models:Foundations}
+    \begin{enumerate}
+        \item From optimal equation, we can get $ v^*_{N} = \sup_{\pi \in \Pi^{HR}} v^\pi_{N} = \sup_{\pi \in \Pi^{HD}} v^\pi_{N} $.
+        \item $  v^*_{N} = \sup_{\pi \in \Pi^{HR}} v^\pi_{N} = \sup_{\pi \in \Pi^{MD}} v^\pi_{N}  $ 
+        \item The condition of attainable optimal equation:
+            \begin{itemize}
+                \item $ \mathcal{S} $ is discrete;
+                \item $ \mathcal{A} $: 
+                    \begin{itemize}
+                        \item $ A_s $ is countable, or;
+                        \item $ A_s $ is compact; $ \mathcal{P}(s' | s, a) $ is lower semi-continuous in a and $ r(s,a) $ is upper semicontinuous in a and $ \left| r(s, a) \right| \le M $.
+                    \end{itemize}
+            \end{itemize}
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}[shrink]{Chapter5: Infinite-horizon Models}
+    Optimality criterion:
+    \begin{enumerate}
+        \item Expected total reward:$ v_1^\pi(s) = \mathbb{E}^\pi_S \left\{ \sum^{\infty}_{t=1} r(X_t, Y_t) \right\} $;
+        \item Expected total discounted reward: $ v^\pi_\lambda(s) = \mathbb{E}^\pi_S \left\{ \sum^{\infty}_{t=1} \lambda^{t-1} r(X_t, Y_t) \right\} $;
+        \item Average reward: $ V_{avg}^\pi(s) = \lim_{n \to \infty} \frac{1}{n} \mathbb{E}^\pi_S \left\{ \sum^{n}_{t=1} r(X_t, Y_t) \right\} = \lim_{n \to \infty} \frac{1}{n} v^\pi_{n+1}(s) $
+    \end{enumerate}
+
+    
+    Markov policies:
+    \[
+        v^\pi_\lambda(s_1) = \sum^{\infty}_{t=1} \sum^{}_{s' \in \mathcal{S}} \sum^{}_{a \in \mathcal{A}_s'} \lambda^{t-1} r(s',a) P^\pi \left\{ S_t = s', A_t = a | S_1 = s_1 \right\}
+    \]
+    Target:
+    \[
+        P^\pi \left\{ S_t = s', A_t = a | S_1 = s_1 \right\} = P^{\pi'} \left\{ S_t = s', A_t = a | S_1 = s_1 \right\} 
+    \]
+    Method:
+    \[
+        \pi' = \left\{ d'_1, d'_2, \ldots \right\},
+        q_{d'_t(s')} (a) = P^\pi \left\{ A_t = a | S_t = s', S_1 = s_1 \right\}
+    \]
+\end{frame}
+
+\begin{frame}[shrink]{Chapter5: Infinite-horizon Models}
+    \begin{proof} 
+        (which means $ v^* = \sup_{\pi \in \Pi^{HR}} v^{\pi} = \sup_{\pi \in \Pi^{MR}} v^{\pi} $).
+        \begin{align*}
+            &P^\pi\left\{ S_t = s' | S_1 = s_1 \right\} \\
+            =& \sum^{}_{s \in S} \sum^{}_{a \in A_s} P^\pi\left\{ S_{t-1}=s, A_{t-1}=a | S_1 = s_1 \right\} p(s' | s, a) \\
+            =& \sum^{}_{s \in S} \sum^{}_{a \in A_s} P^{\pi'}\left\{ S_{t-1}=s, A_{t-1}=a | S_1 = s_1 \right\} p(s' | s, a) \\
+            =& P^{\pi'}\left\{ S_t = s' | S_1 = s_1 \right\}
+        \end{align*}
+        \begin{align*}
+             & P^\pi\left\{S_t = s', A_t = a | S_1 = s_1\right\}\\
+            =& P^\pi\left\{A_t = a | S_t = s', S_1 = s_1\right\} P^\pi\left\{ S_t = s' | S_1 = s_1 \right\}\\
+            =& P^{\pi'}\left\{A_t = a | S_t = s', S_1 = s_1\right\} P^{\pi'}\left\{ S_t = s' | S_1 = s_1 \right\}\\
+            =& P^{\pi'}\left\{S_t = s', A_t = a | S_1 = s_1\right\}
+        \end{align*}
+    \end{proof}
+\end{frame}
+
+\begin{frame}[t]{Chapter6:Discounted Markov Decision Problems}
+    Key assumption:
+    \begin{enumerate}
+        \item Stationary rewards and transition probabilities;
+        \item $ \left| r(s,a) \right| \le M < \infty $;
+        \item $ 0 \le \lambda < 1 $;
+        \item Discrete state space $ \mathcal{S} $.
+    \end{enumerate}
+
+    Policy evaluation (Stationary policy):
+    \[
+        v^{\pi_d}_\lambda = \mathbb{E}^{\pi_d}\left\{ \sum^{\infty}_{t=1} \lambda^{t-1}r(s_t, a_t) \right\} = r_{d} + \lambda P_{d} v^{\pi_d}_{\lambda} = {(I-\lambda P_d)}^{-1} r_d
+    \]
+
+    Optimal equation (Bellman equation):
+    \[
+        v(s) = \sup_{a \in A_s} \left\{ r(s, a) + \sum^{}_{s' \in S} \lambda p(s' | s, a) v(s') \right\}
+    \]
+\end{frame}
+
+\begin{frame}[shrink]{Optimal equations}
+    \begin{theorem}
+        $ \forall v \in V, 0 \le \lambda < 1, $
+        \[
+            \sup_{d \in D^{MD}} \left\{ r_d + \lambda P_d v \right\} = \sup_{d \in D^{MR}} \left\{ r_d + \lambda P_d v \right\} 
+        \]
+        \begin{proof}
+            First, $ D^{MD} \subset D^{MR} $, so $ \sup_{d \in D^{MD}} \left\{ r_d + \lambda P_d v \right\}\preceq \sup_{d \in D^{MR}} \left\{ r_d + \lambda P_d v \right\} $. \\
+            Second, $ \forall d^{MR} \in D^{MR} $, 
+            \begin{align*}
+                &\sum^{}_{a \in A_s} q_{d^{MR}}(a) \left[ r(s, a) + \sum^{}_{s' \in S} \lambda p(s' | s, a) v(s') \right]\\
+                \le& \sup_{a \in A_s} \left\{ r(s, a) + \sum^{}_{s' \in S} \lambda p(s'|s, a) v(s') \right\}
+            \end{align*}
+        \end{proof}
+    \end{theorem}
+\end{frame}
+
+\begin{frame}[t]{Optimal equations}
+    \begin{definition}
+        (Bellman operator)
+        \[
+            \mathcal{L} v = \sup_{d \in D^{MD}} \left\{ r_d + \lambda P_d v \right\}, \quad
+            L v = \max_{d \in D^{MD}} \left\{ r_d + \lambda P_d v \right\}
+        \]
+    \end{definition}
+    \begin{theorem}
+        \begin{enumerate}
+            \item $ v \succeq \mathcal{L} v \Rightarrow v \succeq v^*_\lambda $;
+            \item $ v \preceq \mathcal{L} v \Rightarrow v \preceq v^*_\lambda$;
+            \item $ v = \mathcal{L} v \Rightarrow v $ is unique and $ v = v^*_\lambda $.
+        \end{enumerate}
+    \end{theorem}
+
+    Solving bellman equation:
+    \[
+        v^{n+1} = \mathcal{L}v^{n}, \quad \lim_{n \to \infty} v^n = v^*_{\lambda}
+    \]
+    (The proof need: banach fixed-point theorem, contraction mapping.)
+\end{frame}
+
+\begin{frame}[t]{Optimal equations}
+    \begin{theorem}
+        Assume $ \mathcal{S} $ is discrete, and either
+        \begin{enumerate}
+            \item $ A_s $ is finite for each $ s \in S $, or;
+            \item $ A_s $ is compact, $ r(s,a) $ is continuous in a for each $ s \in S $, and for each $ s' \in S $ and $ s \in S $, $ p(s' | s, a) $ is continuous in a, or;
+            \item $ A_s $ is compact, $ r(s, a) $ is upper semicontinuous in $ a $ for each $ s \in S $, and for each $ s' \in S $ and $ s \in S $, $ p(s' | s, a) $ is lower semicontinuous in a.
+        \end{enumerate}
+        Then there exists an optimal deterministic stationary policy.
+    \end{theorem}
+\end{frame}
+
+\begin{frame}[t]{Value Iteration}
+    \begin{algorithm}[H]
+        \caption{Value Iteration Algorithm}
+        \begin{algorithmic}
+            \Require{$ \epsilon > 0 $}
+            \Ensure{$ v^0 \in V $}
+            \For{$ n = 1, 2, \ldots $}
+                \State{$\forall s \in S, v^{n+1}(s) = \max_{a \in A_s} \left\{ r(s,a) + \sum^{}_{s' \in S} \lambda p(s'|s, a) v^n(s') \right\} $}
+                \If{$ \Arrowvert v^{n+1} - v^n \Arrowvert < \epsilon (1-\lambda) / (2\lambda)$}
+                    \State{break.}
+                \EndIf.
+            \EndFor.
+            \State\Return{$ d_{\epsilon}(s) \in \arg\max_{a \in A_s} \left\{ r(s,a) + \sum^{}_{s' \in S} \lambda p(s' | s, a) v^{n+1}(s') \right\} $}
+        \end{algorithmic}
+    \end{algorithm}
+    Convergence rate of value iteration:
+    $ \Arrowvert v^{n+1} - v^*_\lambda \Arrowvert = \Arrowvert Lv^n - Lv^*_\lambda \Arrowvert \le \lambda \Arrowvert v^n - v^*_\lambda \Arrowvert $
+\end{frame}
+
+\begin{frame}[t]{Policy Iteration}
+    \begin{algorithm}[H]
+    \caption{Policy Iteration Algorithm}
+    \begin{algorithmic}
+        \State{Select an arbitrary rule $ d_0 \in D^{MD} $}.
+        \For{$ n = 1, 2, \ldots $}
+            \State{Policy evaluation: $ v^n = {(I - \lambda P_{d_{n}})}^{-1} r_{d_{n}} $}
+            \State{Policy improvement: $ d_{n+1} \in \arg\max_{d \in D^{MD}} \left\{ r_d + \lambda P_d v^n \right\} $}
+            \If{$ d_{n+1} = d_{n} $}
+                \State{break.}
+            \EndIf.
+        \EndFor.
+        \State{\Return{$ d_{n+1} $}}
+    \end{algorithmic}
+    \end{algorithm}
+    Convergence rate of policy iteration:
+    If policy iteration's sequence $ \left\{ v^n \right\} $ satisfies                                                         
+    $ \Arrowvert P_{d_{v^n}} - P_{d_{v^*_{\lambda}}} \Arrowvert \le K \Arrowvert v^n - v^*_\lambda \Arrowvert $ (for some K),then
+    \[
+        \Arrowvert v^{n+1} - v^*_{\lambda} \Arrowvert \le \frac{K\lambda}{1-\lambda} \Arrowvert v^n - v^*_\lambda \Arrowvert^2
+    \]
+\end{frame}
+
+\begin{frame}[shrink]{Policy Iteration}
+    \begin{enumerate}
+        \item $ v^{n+1} \ge v^{n} $
+                \[
+                   r_{d_{n+1}} + \lambda P _{d_{n+1}}v^n \succeq r_{d_n} + \lambda P_{d_{n}} v^n = v^n
+                \]
+                \[
+                    v^{n+1} = {(I - \lambda P_{d_{n+1}})}^{-1} r_{d_{n+1}} \succeq v^{n}
+                \]
+        \item Let $ Bv = Lv - v $, then $ \forall u,v \in V $ and $ d_v \in D_v $.
+            \[
+                Bu \ge Bv + (\lambda P_{d_{v}} - I)(u-v) \Rightarrow
+                (\lambda P_{d_{v}} - I) \in \partial_{v} (Bv)
+            \]
+        \item $ v^{n+1} = v^n - {(\lambda P _{d_{v^{n}}} - I) }^{-1} B v^{n} $.
+            \begin{align*}
+                v^{n+1} =& {(I - \lambda P_{d_{v^n}})}^{-1} r_{d_{v^{n}}} - v^n + v^n\\
+                =& v^n - {(\lambda P_{d_{v^n}} - I)}^{-1} \left[ r_{d_{v^{n}}} +  {(\lambda P_{d_{v^n}} - I)}v^n \right]\\
+                =& v^n - {(\lambda P _{d_{v^{n}}} - I) }^{-1} B v^{n}
+            \end{align*}
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}[shrink]{Modified Policy Iteration}
+    In policy iteration, we have
+    \[
+        v^{n+1} = v^n - {(\lambda P _{d_{v^{n}}} - I) }^{-1} B v^{n} = v^n + \sum^{\infty}_{k = 0} {\left( \lambda P_{d_{n+1}}^k B v^n \right)}
+    \]    
+    In modified policy iteration
+    \[
+        v^{n+1} = v^n - {(\lambda P _{d_{v^{n}}} - I) }^{-1} B v^{n} = v^n + \sum^{m_n}_{k = 0} {\left( \lambda P_{d_{n+1}}^k B v^n \right)}
+    \]    
+    \begin{align*}
+            v^{n+1} =& v^n + \sum^{m_n}_{k=0} {\left( \lambda P_{d_{n+1}} \right)}^k \left[ r_{d_{n+1}} + \lambda P_{d_{n+1}} v^n - v^n \right]\\
+            =& r_{d_{n+1}} + \lambda P_{d_{n+1}}r_{d_{n+1}} + \cdots + {\left(\lambda P_{d_{n+1}}\right)}^{m_n}r_{d_{n+1}} + {\left( \lambda P_{d_{n+1}} \right)}^{m_n + 1} v^n\\
+            =& {(L_{d_{n+1}})}^{m_n+1}v^n
+    \end{align*}
+\end{frame}
+
+\begin{frame}[shrink]{Modified Policy Iteration}
+    \begin{algorithm}[H]
+    \caption{Modified Policy Iteration Algorithm (MPI)}
+    \begin{algorithmic}
+        \Require{$ \epsilon > 0, \left\{ m_0, m_2, \ldots \right\} $}.
+        \Ensure{$ v^0 \in V_B $}.
+        \For{$ n = 0, 1, \ldots $}
+            \State{$ d_{n+1} \in \arg\max_{d \in D} \left\{ r_d + \lambda P_d v^n \right\} $}
+            \State{$ u^0_n = r_{d_{n+1}} + \lambda P_{d_{n+1}} v^n $}
+            \If{$ \Arrowvert u^0_n - v^n \Arrowvert < \epsilon(1-\lambda)/(2\lambda) $} {break} \EndIf.
+            \For{$ k = 0, 1, \ldots, m_n $}
+                \State{$ u^{k+1}_n = r_{d_{n+1}}+ \lambda P_{d_{n+1}} u^k_n = L_{d_{n+1}} u^k_n $}
+            \EndFor.
+            \State{($ v^{n+1} = L_{d_{n+1}}^{ m_n + 1 } v^n $) }
+        \EndFor.
+        \State{\Return{$ d_{n+1} $}}
+    \end{algorithmic}
+    \end{algorithm}
+    Convergence rate of modified policy iteration:
+    \[
+        \Arrowvert v^{n+1} - v^*_\lambda \Arrowvert \le 
+        \left( \frac{\lambda (1 - \lambda^{m_n})}{1- \lambda} \Arrowvert P_{d_n} - P_{d^*} \Arrowvert + \lambda^{m_n + 1} \right) \Arrowvert v^n - v^*_{\lambda} \Arrowvert.
+    \]
+    
+\end{frame}
+\end{document}

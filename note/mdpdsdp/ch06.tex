@@ -53,11 +53,9 @@ Optimality equations or Bellamn equations (in discounted MDP):
 \]
 
 \begin{lemma}
-    $ \forall v \in V, 0 \le \lambda < 1, \sup_{d \in D^{MD}} \left\{ r_d + \lambda P_d v \right\}
-    = \sup_{d \in D^{MR}} \left\{ r_d + \lambda P_d v \right\}$ 
+    $ \forall v \in V, 0 \le \lambda < 1, \sup_{d \in D^{MD}} \left\{ r_d + \lambda P_d v \right\} = \sup_{d \in D^{MR}} \left\{ r_d + \lambda P_d v \right\}$ 
     \begin{proof}
-        First, $ D^{MD} \subset D^{MR} $, so $ \sup_{d \in D^{MD}} \left\{ r_d + \lambda P_d v \right\}
-    \preceq \sup_{d \in D^{MR}} \left\{ r_d + \lambda P_d v \right\} $.
+        First, $ D^{MD} \subset D^{MR} $, so $ \sup_{d \in D^{MD}} \left\{ r_d + \lambda P_d v \right\}\preceq \sup_{d \in D^{MR}} \left\{ r_d + \lambda P_d v \right\} $.
     Second, $ \forall d^{MR} \in D^{MR} $,
     \[
         \sum^{}_{a \in A_s} q_{d^{MR}}(a) \left[ r(s, a) + \sum^{}_{s' \in S} \lambda p(s' | s, a) v(s') \right]
@@ -115,7 +113,7 @@ Optimality equations or Bellamn equations (in discounted MDP):
         \]
         \[
             \Rightarrow v \preceq {(I - \lambda P_d)}^{-1}(r_d + \epsilon \cdot \vec e)
-        = v^{d^\infty}_{\lambda} + {(1 - \lambda)}^{-1} \epsilon \cdot \vec e
+        = v^{\pi_d}_{\lambda} + {(1 - \lambda)}^{-1} \epsilon \cdot \vec e
     \preceq \sup_{\pi \in \Pi^{HR}} v^\pi_{\lambda} + {(1-\lambda)}^{-1} \epsilon \cdot \vec e
         \]
     \end{proof}
