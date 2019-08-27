@@ -1,29 +1,35 @@
-\contentsline {section}{\numberline {4}Chapter4: Finite-Horizon Markov Decision Processes}{2}
-\contentsline {subsection}{\numberline {4.1}OPTIMALITY CRITERIA}{2}
-\contentsline {subsubsection}{\numberline {4.1.1}Some Preliminaries}{2}
-\contentsline {subsubsection}{\numberline {4.1.2}The Expected Total Reward Criterion}{2}
-\contentsline {subsubsection}{\numberline {4.1.3}Optimal Policies}{3}
-\contentsline {subsection}{\numberline {4.2}FINITE-HORIZON POLICY EVALUATION}{3}
-\contentsline {subsection}{\numberline {4.3}OPTIMALITY EQUATIONS AND THE PRINCIPLE OF OPTIMALITY}{4}
-\contentsline {subsection}{\numberline {4.4}OPTIMALITY OF DETERMINISTIC MARKOV POLICIES}{6}
-\contentsline {subsection}{\numberline {4.5}BACKWARD INDUCTION}{7}
-\contentsline {subsection}{\numberline {4.6}OPTIMALITY OF MONOTONE POLICIES}{7}
-\contentsline {subsubsection}{\numberline {4.6.1}Structured Policies}{7}
-\contentsline {subsubsection}{\numberline {4.6.2}Superadditive Functions}{7}
-\contentsline {subsection}{\numberline {4.7}Optimality of Monotone Policies}{7}
-\contentsline {section}{\numberline {5}Infinite-Horizon Models: Foundations}{8}
-\contentsline {subsection}{\numberline {5.1}THE VALUE OF A POLICY}{8}
-\contentsline {subsection}{\numberline {5.2}MARKOV POLICIES}{8}
-\contentsline {section}{\numberline {6}Discounted Markov Decision Problems}{10}
-\contentsline {subsection}{\numberline {6.1}POLECY EVALUATION (Stationary Policy)}{10}
-\contentsline {subsection}{\numberline {6.2}OPTIMALITY EQUATIONS}{10}
-\contentsline {subsection}{\numberline {6.3}VALUE ITERATION AND ITS VARIANTS}{13}
-\contentsline {subsubsection}{\numberline {6.3.1}Rates of Convergence}{13}
-\contentsline {subsubsection}{\numberline {6.3.2}Value Iteration}{14}
-\contentsline {subsection}{\numberline {6.4}POLICY ITERATION}{15}
-\contentsline {subsection}{\numberline {6.5}MODIFIED POLICY ITERATION}{17}
-\contentsline {subsubsection}{\numberline {6.5.1}Convergence Rates}{19}
-\contentsline {subsection}{\numberline {6.6}SPANS, BOUNDS, STOPPING CRITERIA, AND RELATIVE VALUE ITEARTION}{19}
-\contentsline {subsubsection}{\numberline {6.6.1}The Span Seminorm}{19}
-\contentsline {subsubsection}{\numberline {6.6.2}Bounds on the Value of a Discounted Markov Decision Process}{21}
-\contentsline {subsubsection}{\numberline {6.6.3}Stopping Criteria}{21}
+\contentsline {section}{\numberline {4}Chapter4: Finite-Horizon Markov Decision Processes}{3}
+\contentsline {subsection}{\numberline {4.1}OPTIMALITY CRITERIA}{3}
+\contentsline {subsubsection}{\numberline {4.1.1}Some Preliminaries}{3}
+\contentsline {subsubsection}{\numberline {4.1.2}The Expected Total Reward Criterion}{3}
+\contentsline {subsubsection}{\numberline {4.1.3}Optimal Policies}{4}
+\contentsline {subsection}{\numberline {4.2}FINITE-HORIZON POLICY EVALUATION}{4}
+\contentsline {subsection}{\numberline {4.3}OPTIMALITY EQUATIONS AND THE PRINCIPLE OF OPTIMALITY}{5}
+\contentsline {subsection}{\numberline {4.4}OPTIMALITY OF DETERMINISTIC MARKOV POLICIES}{7}
+\contentsline {subsection}{\numberline {4.5}BACKWARD INDUCTION}{8}
+\contentsline {subsection}{\numberline {4.6}OPTIMALITY OF MONOTONE POLICIES}{8}
+\contentsline {subsubsection}{\numberline {4.6.1}Structured Policies}{8}
+\contentsline {subsubsection}{\numberline {4.6.2}Superadditive Functions}{8}
+\contentsline {subsection}{\numberline {4.7}Optimality of Monotone Policies}{8}
+\contentsline {section}{\numberline {5}Infinite-Horizon Models: Foundations}{9}
+\contentsline {subsection}{\numberline {5.1}THE VALUE OF A POLICY}{9}
+\contentsline {subsection}{\numberline {5.2}MARKOV POLICIES}{9}
+\contentsline {section}{\numberline {6}Discounted Markov Decision Problems}{11}
+\contentsline {subsection}{\numberline {6.1}POLECY EVALUATION (Stationary Policy)}{11}
+\contentsline {subsection}{\numberline {6.2}OPTIMALITY EQUATIONS}{11}
+\contentsline {subsection}{\numberline {6.3}VALUE ITERATION AND ITS VARIANTS}{14}
+\contentsline {subsubsection}{\numberline {6.3.1}Rates of Convergence}{14}
+\contentsline {subsubsection}{\numberline {6.3.2}Value Iteration}{15}
+\contentsline {subsection}{\numberline {6.4}POLICY ITERATION}{16}
+\contentsline {subsection}{\numberline {6.5}MODIFIED POLICY ITERATION}{18}
+\contentsline {subsubsection}{\numberline {6.5.1}Convergence Rates}{20}
+\contentsline {subsection}{\numberline {6.6}SPANS, BOUNDS, STOPPING CRITERIA, AND RELATIVE VALUE ITEARTION}{20}
+\contentsline {subsubsection}{\numberline {6.6.1}The Span Seminorm}{20}
+\contentsline {subsubsection}{\numberline {6.6.2}Bounds on the Value of a Discounted Markov Decision Process}{22}
+\contentsline {subsubsection}{\numberline {6.6.3}Stopping Criteria}{22}
+\contentsline {subsection}{\numberline {6.7}ACTION ELIMINATION PROCEDURES}{24}
+\contentsline {subsubsection}{\numberline {6.7.1}Identification of Nonoptimal Actions}{24}
+\contentsline {subsubsection}{\numberline {6.7.2}Action Elimination Procedures}{24}
+\contentsline {subsubsection}{\numberline {6.7.3}Modified Policy Iteration with Action Elimination and an Improved Stopping Criterion}{26}
+\contentsline {subsubsection}{\numberline {6.7.4}Numerical Performance of Modified Policy Iteration with Action Elimination}{26}
+\contentsline {subsection}{\numberline {6.8}CONVERGENCE OF POLICIES， TURNPIKES，AND PLANNING HORIZONS}{26}

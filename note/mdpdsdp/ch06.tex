@@ -740,3 +740,239 @@ In chapter8, the following algorithm is useful.
         \State{\Return{$ d_\epsilon \in \arg\max_{d \in D} \left\{ r_d + \lambda P_d u^n \right\} $}}
     \end{algorithmic}
 \end{algorithm}
+
+\subsection{ACTION ELIMINATION PROCEDURES}%
+
+The advantages of using action elimination procedures:
+\begin{enumerate}
+    \item Reduction in size of the action sets;
+    \item Get $ optimal $ policy, instead of $ \epsilon-optimal $.
+\end{enumerate}
+
+\subsubsection{Identification of Nonoptimal Actions}%
+
+\[
+    B(s,a) v = r(s, a) + \sum^{}_{s' \in S} \lambda p(s' | s, a) v(s') - v(s).
+\]
+
+\begin{proposition}
+    \[
+        B(s, a') v^*_{\lambda} < 0 \Rightarrow a' \notin \arg\max_{a \in A_s} \left\{ r(s,a) + \sum^{}_{s' \in S} \lambda p(s'|s,a) v^{*}_{\lambda}(s') \right\}
+    \]
+    \begin{proof}
+        \[
+            \forall s, a', B(s,a') v^*_{\lambda} \le \max_{a \in A_S} B(s,a) v^*_{\lambda} = 0;
+        \]
+        \[
+            a' \in \arg\max_{a \in A_s} \left\{ r(s,a) + \sum^{}_{s' \in S} \lambda p(s'|s,a) v^{*}_{\lambda}(s') \right\}\Rightarrow B(s, a') v^{*}_{\lambda} = 0
+        \]
+    \end{proof}
+\end{proposition}
+
+Since $ v^*_{\lambda} $ is unknown, the result in preceeding proposition cannot be used in practice to identify nonoptimal actions.
+
+\begin{proposition}
+    If $ a' $ satisfies $ \exists v^L \preceq v^*_{\lambda} \preceq v^{U} $ that 
+    \[
+        r(s,a') + \sum^{}_{s' \in S} \lambda p(s' | s, a') v^{U}(s') < v^{L}(s)
+    \]
+    \begin{proof}
+        \[
+            B(s,a) v^{*}_\lambda \le B(s,a) v^{U} < v^{L}(s) \le v^{*}_{\lambda}(s)
+        \]
+    \end{proof}
+\end{proposition}
+
+\subsubsection{Action Elimination Procedures}%
+
+\begin{definition}
+    (Action Elimination Procedures)
+    \begin{itemize}
+        \item Policy evaluation;
+        \item Action elimination;
+        \item Policy Improvement over reduced action set.
+    \end{itemize}
+\end{definition}
+
+Recall that
+\[
+    v^{n+1} = 
+    \begin{cases}
+        Lv^n, & \text{for value iteration} \\
+        v^{n} + \sum^{m_n}_{k=0} {(\lambda P_{d_{v^n}})}^{k} B v^{n}, & \text{for modified policy iteration}\\
+        {(I - \lambda P_{d_{v^n}})}^{-1} r_{d_{v^n}}, &\text{for policy iteration}
+    \end{cases}
+\]
+
+We use the weakest upper: $ v^{U} = v^n + \frac{\lambda}{1 - \lambda} \Upsilon(B v^n) \vec{1} $.
+
+Define
+\[
+    G_{m}(v) = v + \sum^{m-1}_{k=0} {(\lambda P_{d_v})}^{k} Bv + \lambda^{m}{(1 - \lambda)}^{-1} \Lambda(Bv) \vec{1}
+\]
+For value iteration $ v^L = G_0(v^{n}) $, for modified policy iteration $ v^L = G_{m_n}(v^n) $ and for policy iteration $ v^L = G_{\infty}(v^{n}) $.
+Then Action $ a' $ is nonoptimal in state s at iteration n if
+
+\[
+    r(s,a') + \sum^{}_{s' \in S} \lambda p(s' | s, a') v^{n}(s') + \frac{\lambda}{1 - \lambda} \Upsilon(B v^n) < G_{m_n}(v^n) (s)
+\]
+Which is equal to
+\[
+    \frac{\lambda}{1 - \lambda} sp(B v^{n}) < L v^{n}(s) - r(s,a) - \sum^{}_{s' \in S}  \lambda p(s' | s, a) v^{n}(s')
+\]
+The $ \lambda/(1 - \lambda) $ can be replaced by $ \lambda\gamma_{s,a} / (1 - \lambda \gamma) $:
+\[
+    \gamma_{s,a} = \max_{a' \in A_S} \left\{ 1 - \sum^{}_{s' \in S} \min \left[ p(s'|s,a), p(s'|s,a') \right] \right\}
+\]
+\[
+    \gamma = \max_{s\in S, a \in A_S, s' \in S, a' \in A_{s'}} \left\{ 1 - \sum^{}_{s' \in S} \min \left[ p(s'|s,a), p(s'|s,a') \right] \right\}
+\]
+\begin{proposition}
+    If $ v' = v + \sum^{p}_{k=0} {(\lambda P_{d_{v}})}^k Bv $,
+    \[
+        \forall p, q \ge 0, G_{p}(v) \preceq G_{q}(v') \preceq v^{*}_{\lambda} \preceq G^{q}(v') \preceq G^{p}(v)
+    \]
+    \begin{proof}
+        We proof $ G_p(v) \preceq G_0(v') = v' + \frac{1}{1-\lambda} \Lambda(Bv') \vec{1} $.
+        \begin{align*}
+            G_0(v') - G_p(v)=& v' + \frac{1}{1 - \lambda} \Lambda(Bv') \vec{1} - v - \sum^{p-1}_{k=0} {(\lambda P_{d_v})}^{k}Bv - \frac{\lambda^p}{1 - \lambda} \Lambda(Bv) \vec{1} \\
+            =& {(\lambda P_{d_v})}^p Bv + \frac{1}{1 - \lambda} \Lambda(Bv') \vec{1} - \frac{\lambda^p}{1 - \lambda} \Lambda(Bv) \vec{1} \\
+            Bv' =& Lv' - v' = L [ L^{p+1}_{d_v} v] - L^{p+1}_{d_v}v \\
+            \succeq & L^{p+2}_{d_v}v - L^{p+1}_{d_v} v = L^{p+1}_{d_v} [Bv] \succeq \lambda^{p+1} \Lambda(Bv) \vec{1}\\
+            G_0(v') - G_p(v) \succeq& \lambda^p \Lambda(Bv) \vec{1} + \frac{\lambda^{p+1}}{1 - \lambda} \Lambda(Bv) \vec{1} - \frac{\lambda^p}{1 - \lambda} \Lambda(Bv) \vec{1} = \vec{0}
+        \end{align*}
+        We already have $ G_{q-1}(v') \preceq G_{q}(v') $.
+        \[
+            Bv' = L\left[ L^{p+1}_{d_v}v \right] - L^{p+1}_{d_v}v
+            \preceq L_{d_{v'}}\left[ L^{p+1}_{d_v}v - L^{p}_{d_v}v \right]
+            = L_{d'_{v'}} \left[ \lambda^p \Upsilon(Bv) \right]
+            = \lambda^{p+1} \Upsilon(Bv)\\
+        \]
+        \begin{align*}
+            G^{p} (v) - G^{0}(v') =& \frac{\lambda^p}{1 - \lambda} \Upsilon(Bv) \vec{1} - \frac{1}{1 - \lambda} \Upsilon(Bv') \vec{1} - {(\lambda P_{d_v})}^p Bv\\
+            \succeq& \frac{\lambda^p}{1 - \lambda} \Upsilon(Bv) \vec{1} - \frac{\lambda^{p+1}}{1 - \lambda} \Upsilon(Bv)\vec{1} - \lambda^{p} \Upsilon(Bv) \vec{1} = \vec{0}
+        \end{align*}
+    \end{proof}
+\end{proposition}
+
+\begin{align*}
+    &r(s,a') + \sum^{}_{s' \in S} \lambda p(s' | s,a') G^{m_{n+1}}(v^{n+1}) \\
+    \preceq& r(s,a') + \sum^{}_{s' \in S} \lambda p(s' | s,a') G^{m_{n}}(v^n) \\
+    \preceq& G_{m_{n}}(v^n) \preceq G_{m_{n+1}}(v^{n+1})
+\end{align*}
+
+Which means that it's safty to eliminate nonoptimal action $ a' $ in step n.
+
+Another complicate criterion is (without proof)
+\begin{theorem}
+    Let $ \left\{ v^n \right\} $ be generated by modified policy iteration, and let $ d_{n+1} $ be any $ v^{n+1} $-improving decision rule. Then $ d_{n+1}(s) $ will note equal $ a' $ if, for some $ v \le n $,
+    \[
+        r(s,a') + \sum^{}_{s' \in S}  \lambda p(s' | s, a') v^{\nu}(s') + \lambda \sum^{n}_{k = \nu} \Upsilon(v^{k+1} - v^{k}) - v^{n+1}(s) < \lambda^{m_n + 1} \Lambda(P^{m_n}_{d_{v^n}} B v^n)
+    \]
+\end{theorem}
+
+\subsubsection{Modified Policy Iteration with Action Elimination and an Improved Stopping Criterion}%
+\label{ssub:modified_policy_iteration_with_action_elimination_and_an_improved_stopping_criterion}
+
+\subsubsection{Numerical Performance of Modified Policy Iteration with Action Elimination}%
+\label{ssub:numerical_performance_of_modified_policy_iteration_with_action_elimination}
+
+\subsection{CONVERGENCE OF POLICIES， TURNPIKES，AND PLANNING HORIZONS}%
+\label{sub:convergence_of_policies_turnpikes_and_planning_horizons}
+
+Up to now, we focused on properties of sequences of values $ \left\{ v^n \right\} $. Then we study the correspongding decision rules $ \left\{ D_n \right\} $ where
+\[
+    D_n = \left\{ d \in D: r_d + \lambda P_d v^n = \max_{d \in D} \left\{ r_d + \lambda P_d v^n \right\} \right\}
+\]
+
+Let $ D^* = \left\{ d \in D: r_d + \lambda P_{d} v^*_{\lambda} = \max_{d' \in D} \left\{ r_{d'} + \lambda P_{d'} v^*_{\lambda} \right\} \right\} $.
+In this section, we let $ \left\{ v^n \right\} $ be the sequences of value iteration's sequence.
+
+\begin{theorem}
+    Suppose S and $ A_S $ are finite. Then for any $ v^0 \in V $, there exists an $ n^* $ such that, for all $ n \ge n^* $, $ D_{n} \subset D^* $. If $ D^* = D, n^* = 0 $. Otherwise,
+    \[
+        n^* \le \left\lfloor \frac{\log(\lambda^{-1}(1-\lambda)c) - \log(sp(Bv^0))}{\log(\lambda \gamma)}  \right\rfloor^{+} + 1,
+        \quad 
+        c = \inf_{d \in D\slash D^*} \Arrowvert v^*_{\lambda} - L_{d}v^{*}_{\lambda} \Arrowvert_{\infty} > 0
+    \]
+    \begin{proof}
+        \[
+            v_n^L = v^n + {(1 - \lambda)}^{-1} \Lambda(Bv^n) \vec{1} \preceq v^*_{\lambda} \preceq
+            v^n + {(1 - \lambda)}^{-1}\Upsilon(Bv^n) \vec{1} = v^{U}_n
+        \]
+        \begin{align*}
+            &v^*_{\lambda} - L_{d_n} v^*_{\lambda} \preceq v^{U}_{n+1} - L_{d_n}v^L_{n}\\
+            =& v^{n+1} + {(1 - \lambda)}^{-1} \Upsilon(Bv^{n+1}) \vec{1}
+            - L_{d_n}\left[ v^n + {(1 - \lambda)}^{-1} \Lambda(B v^{n})\vec{1} \right]\\
+            \preceq& \lambda {(1 - \lambda)}^{-1}\left[ \Upsilon(B v^n) - \Lambda(Bv^n) \right] \vec{1}\\
+            &v^*_{\lambda} - L_{d_n} v^*_{\lambda} \succeq v^{L}_{n+1} - L_{d_n}v^U_{n}\\
+            =& v^{n+1} + {(1 - \lambda)}^{-1} \Lambda(Bv^{n+1}) \vec{1}
+            - L_{d_n}\left[ v^n + {(1 - \lambda)}^{-1} \Upsilon(B v^{n})\vec{1} \right]\\
+            \succeq& \lambda {(1 - \lambda)}^{-1}\left[ \Lambda(B v^n) - \Upsilon(Bv^n) \right] \vec{1}\\
+            &\Arrowvert v^*_{\lambda} - L_{d_n} v^*_{\lambda}  \Arrowvert_\infty 
+            \le \lambda{(1-\lambda)}^{-1} sp(Bv^n) \vec{1}
+        \end{align*}
+        Then if $ \lambda{(1-\lambda)}^{-1} sp(Bv^n) \vec{1} < c \vec{1} $, we can guarantee that  $ \forall d_n \in D_n$, $ \Arrowvert v^*_{\lambda} - L_{d_n} v^*_{\lambda} \Arrowvert_{\infty} < c \Rightarrow D_n \subset D^* $. Furthermore, we already have
+        \[
+            sp(B v^n) \le {(\lambda \gamma)}^{n} sp(B v^0)
+        \]
+        we can let $ n^* $ satisfies
+        \[
+            {(\lambda \gamma)}^{n^*} sp(Bv^0) \le \frac{1 - \lambda}{\lambda} c \Rightarrow
+            n^{*} \ge \frac{\log(\lambda^{-1}(1 - \lambda)c) - \log(sp(Bv^0))}{\log(\lambda\gamma)} 
+        \]
+        We refine our proof: $ n^* \ge \frac{\log(\lambda^{-1}(1 - \lambda)c) - \log(sp(Bv^0))}{\log(\lambda\gamma)} $ is sufficient to guarantee that $ \forall n \ge n^* $, $ D_n \subset D^* $.
+    \end{proof}
+\end{theorem}
+
+This bound may be quite large when $ \lambda \rightarrow 1 $.
+
+\begin{lemma}
+    \[
+        \gamma = \max_{s \in S, a \in A_s, s' \in S, a' \in A_{s'}} \left[ 1 - \sum^{}_{j\in S} \min \left[ p(j|s,a), p(j|s, a') \right]  \right]
+    \]
+    Then, for any $ u \in V, d \in D $ and $ d' \in D $
+    \[
+        -\gamma sp(u) \vec{1} \preceq P_d u - P_{d'}u \preceq \gamma sp(u) \vec{1}
+    \]
+    \begin{proof}
+        \begin{align*}
+            P_d u - P_{d'}u \preceq sp\left( 
+                \begin{bmatrix}
+                P_d \\
+                P_{d'}
+                \end{bmatrix} u \right) \vec{1}
+                \preceq \gamma_d sp(u) \vec{1} \preceq \gamma sp(u) \vec{1}
+        \end{align*}
+    \end{proof}
+\end{lemma}
+
+\begin{proposition}
+    Another sufficient bound
+    \[
+        n^* \ge \frac{ \log(c) - \log(sp(v^*_\lambda - v^0))}{ \log (\lambda \gamma)} 
+    \]
+    \begin{proof} $ \forall d_n \in D_n $,
+        \begin{align*}
+            Lv^{*}_{\lambda} - L_{d_n} v^{*}_{\lambda}
+            =& L\left[ v^n + (v^*_{\lambda} - v^n) \right] - L_{d_n}\left[ v^n + (v^*_{\lambda} - v^n) \right]\\
+            =& L_{d^*} v^n - L_{d_n} v^n + \lambda P_{d^*} (v^{*}_{\lambda} - v^n) - \lambda P_{d_n} (v^*_{\lambda} - v^n)\\
+            \preceq& L_{d^*}v^n - L_{d_n} v^n + \lambda \gamma sp(v^*_{\lambda} - v^n)\\
+            \preceq&  L_{d^*}v^n - L_{d_n} v^n + {(\lambda \gamma)}^{n+1} sp(v^*_{\lambda} - v^0)\\
+            \preceq& {(\lambda \gamma)}^{n+1} sp(v^*_{\lambda} - v^0)
+        \end{align*}
+        \begin{align*}
+            Lv^{*}_{\lambda} - L_{d_n} v^{*}_{\lambda}
+            =& L\left[ v^*_{\lambda} + (v^n - v^*_{\lambda}) \right] - L_{d_n}\left[ v^*_{\lambda} + (v^n - v^*_{\lambda}) \right]\\
+            =& L_{d^*} v^*_\lambda - L_{d_n} v^{*}_{\lambda} + \lambda P_{d^*} ( v^n - v^{*}_{\lambda}) - \lambda P_{d_n} ( v^n - v^*_{\lambda})\\
+            \succeq& L_{d^*}v^*_{n} - L_{d_n} v^*_{n} - \lambda \gamma sp(v^n - v^*_{\lambda})\\
+            \succeq&  L_{d^*}v^n - L_{d_n} v^n - {(\lambda \gamma)}^{n+1} sp(v^*_{\lambda} - v^0)\\
+            \succeq& - {(\lambda \gamma)}^{n+1} sp(v^*_{\lambda} - v^0)\\
+        \end{align*}
+        We want $ \forall d_n \in D_n $, $ v^*_{\lambda} - L_{d_n} v^*_{\lambda} \le c \vec{1} $, let
+        \[
+            {(\lambda \gamma)}^{n^*+1} sp(v^*_{\lambda} - v^0) \le c
+            \Rightarrow n^* \ge  \frac{\log c - \log(sp(v^*_{\lambda} - v^0))}{ \log(\lambda \gamma)} - 1
+        \]
+    \end{proof}
+\end{proposition}
