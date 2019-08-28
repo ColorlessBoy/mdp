@@ -33,3 +33,8 @@
 \contentsline {subsubsection}{\numberline {6.7.3}Modified Policy Iteration with Action Elimination and an Improved Stopping Criterion}{26}
 \contentsline {subsubsection}{\numberline {6.7.4}Numerical Performance of Modified Policy Iteration with Action Elimination}{26}
 \contentsline {subsection}{\numberline {6.8}CONVERGENCE OF POLICIES， TURNPIKES，AND PLANNING HORIZONS}{26}
+\contentsline {subsection}{\numberline {6.9}LINEAR PROGRAMMING}{28}
+\contentsline {subsubsection}{\numberline {6.9.1}Model Formulation}{28}
+\contentsline {subsubsection}{\numberline {6.9.2}Basic Solutions and Stationary Policies}{28}
+\contentsline {subsubsection}{\numberline {6.9.3}Optimal Solutions and Optimal Policies}{30}
+\contentsline {subsection}{\numberline {6.10}Remain sections}{30}

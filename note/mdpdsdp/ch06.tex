@@ -976,3 +976,108 @@ This bound may be quite large when $ \lambda \rightarrow 1 $.
         \]
     \end{proof}
 \end{proposition}
+
+\subsection{LINEAR PROGRAMMING}%
+\label{sub:linear_programming}
+
+\subsubsection{Model Formulation}%
+
+\textbf{Primal Linear Program}:
+\[
+    \min_{v} \vec{\alpha}^T \vec{v}, \quad{s.t.}\quad \forall s, a,\ v(s) - \sum^{}_{j\in S} \lambda p(j|s,a) v(j) \ge r(s,a)
+\]
+\textbf{Dual Linear Pragram}:
+\[
+    \max_{\beta} \sum^{}_{s\in S, a \in A_s} r(s,a) \beta_{s,a},\quad{s.t.}\quad
+    \forall s,a, \sum^{}_{a \in A_i} \beta_{i,a} - \sum^{}_{s \in S, a \in A_s} \lambda p(i|s,a) \beta_{s,a} = \alpha(i)
+\]
+
+\begin{proof}
+    Primal Linear Program equals:
+    \[
+         \min_{v} \max_{\beta \ge 0} L(v, \beta)= \min_{v} \vec{\alpha}^T \vec{v}+ \sum^{}_{s\in S,a\in A_s} \beta_{s,a} \left\{ r(s,a) - v(s) + \sum^{}_{j \in S}\lambda p(j|s,a) v(j)  \right\}
+    \]
+    \[
+        \min_{v} \max_{\beta \ge 0} L(v, \beta) \ge \max_{\beta \ge 0} \min_{v} L(v, \beta)
+    \]
+    \[
+        \frac{\partial{L(v, \beta)}}{\partial{v_i}} = \alpha_i - \sum^{}_{a \in A_i} \beta_{i, a} + \sum^{}_{s \in S, a\in A_s} \lambda p(i | s, a) v(i)
+    \]
+    \[
+        \min_{v} L(v, \beta) = \sum^{}_{s \in S, a \in A_s} r(s,a) \beta_{s,a}
+    \]
+\end{proof}
+
+\subsubsection{Basic Solutions and Stationary Policies}%
+
+For all $ d \in D^{MR} $, following $ \beta^{d}_{s,a} $ is a feasible solution to the dual problem.
+\[
+    \beta^d_{s,a} = \sum^{}_{j\in S} \alpha(j) \sum^{\infty}_{n=1} \lambda^{n-1} P^{d^{\infty}} (S_n = s, A_n = a | X_1 = j)
+\]
+\begin{proof}
+    \begin{align*}
+        &\sum^{}_{s\in S, a \in A_s} \lambda p(i|s,a) \beta^d_{s,a} \\
+        =& \sum^{}_{s\in S, a \in A_s} \lambda p(i|s,a) \sum^{}_{j\in S} \alpha(j) \sum^{\infty}_{n=1} \lambda^{n-1} P^{d^{\infty}} (S_n = s, A_n = a | X_1 = j)\\
+        =& \sum^{}_{j\in S} \alpha(j) \sum^{\infty}_{n=1} \lambda^{n} \sum^{}_{s\in S, a \in A_s} p(i|s,a) P^{d^{\infty}} (S_n = s, A_n = a | X_1 = j)\\
+        =& \sum^{}_{j\in S} \alpha(j) \sum^{\infty}_{n=1} \lambda^{n} P^{d^\infty}(S_{n+1}=i | S_1 = j)\\
+        =& \sum^{}_{j\in S} \alpha(j) ( \sum^{\infty}_{n=1} \lambda^{n-1} P^{d^{\infty}}(S_n = i | S_1 = j) - P^{d^\infty} (S_1 = i | S_1 = j) )\\
+        =& \sum^{}_{j\in S} \alpha(j) ( \sum^{\infty}_{n=1} \lambda^{n-1} \sum^{}_{a \in A_i} P^{d^{\infty}}(S_n = i, A_n = a | S_1 = j) - P^{d^\infty} (S_1 = i | S_1 = j) )\\
+        =& \sum^{}_{a \in A_i} \beta^{d}_{i,a} - a(i)
+    \end{align*}
+\end{proof}
+
+Suppose $ \beta_{s,a} $ is a feasible solution to the dual problem, we can construct $ \beta^{d}_{s,a} = \beta_{s,a} $.
+\begin{proof}
+    For each $ s \in S $, $ \sum^{}_{a \in A_s} x(s, a) > 0 $ (Because $ \alpha \succ \vec{0} $), then construct the randomized stationary policy $ d^{\infty}_{x} $ by
+    \[
+        \mathbb{P}\left\{ d_x(s) = a \right\} = \frac{\beta_{s,a}}{ \sum^{}_{a' \in A_s} \beta_{s,a'}} 
+    \]
+    \begin{align*}
+        \alpha(i) =& \sum^{}_{a \in A_i} \beta_{s,a} - \sum^{}_{s\in S, a \in A_s} \lambda p(i | s,a) \beta_{s,a}\\
+        =& \sum^{}_{a \in A_i} \beta_{s,a} - \sum^{}_{s\in S, a \in A_s} \lambda p(i | s,a) p(d_x(s) = a) \sum^{}_{a' \in A_s} \beta_{s,a}\\
+        =& \sum^{}_{a \in A_i} \beta_{s,a} - \sum^{}_{s \in S} \lambda p_{d_x}(i|s) \sum^{}_{a' \in A_s} \beta_{s,a'}
+    \end{align*}
+    \[
+        {\left(\sum^{}_{a \in A_s} \beta_{s,a}\right)}^T = \alpha^T {\left[ I - \lambda P_{d_x} \right]}^{-1}
+        = a^T \left[ \sum^{\infty}_{n=1} {(\lambda P_{d_x})}^{n-1}  \right] 
+        = \sum^{}_{j \in S} \alpha(j) \sum^{\infty}_{n=1} \lambda^{n-1}P^{d^{\infty}_x}(S_n = s|S_1 = j)
+    \]
+    \[
+        \sum^{}_{a \in A_s} \beta_{s,a} = \sum^{}_{a \in A_s} \beta^{d_x}_{s,a}
+    \]
+    \begin{align*}
+        \beta^{d_x}_{s,a} =& \sum^{}_{j \in S} \alpha(j) \sum^{\infty}_{n=1} \lambda^{n-1}P^{d^{\infty}_x} (X_n = s | X_1 = j) q_{d_{x}(s)}(a) \\
+        =& \sum^{}_{j \in S} \alpha(j) \sum^{\infty}_{n=1} \lambda^{n-1}P^{d^{\infty}_x} (X_n = s | X_1 = j)  \frac{\beta_{s,a}}{\sum^{}_{a' \in A_s} \beta_{s,a'}} \\
+        =& \sum^{}_{a \in A_s} \beta^{d_x}_{s,a} \frac{\beta_{s,a}}{\sum^{}_{a' \in A_s} \beta_{s,a'}} = \beta_{s,a}
+    \end{align*}
+\end{proof}
+
+By the define of $ \beta^{d}_{s,a} $, we have
+\[
+    \sum^{}_{s \in S} \alpha(s) v^{d^\infty_x}_{\lambda}(s) = \sum^{}_{s\in S, a \in A_s} \beta^d_{s,a} r(s,a)
+\]
+
+We have mapped $ D^{MR} $ into $ \left\{ \beta \right\} $, and mapped $ \left\{ \beta \right\} $ into $ D^{MR} $.
+
+We call the base of set $ \left\{ \beta \right\} $ basic feasible solution.
+
+\begin{enumerate}
+    \item Let $ \beta_i $ be standard base of $ \left\{ \beta \right\} $, then $ d_{\beta_i} \in D^{MD} $. (trivial for standard base);
+    \item Suppose that $ d \in D^{MD} $, then $ \beta_d $ is a standard base of $ \left\{ \beta \right\} $;
+        \begin{proof}
+            if $ \beta_d $ is not standard base, we can write $ \beta_d = \left[ \beta_1, \beta_2, \ldots  \right]\vec{w} $. It's easy to verify that $ d_{\beta_d} = d_{\left[ \beta_1, \beta_2, \ldots \right] \vec{w}} \notin D^{MD} $, which causes contradiction.
+        \end{proof}
+\end{enumerate}
+
+\subsubsection{Optimal Solutions and Optimal Policies}%
+\label{ssub:optimal_solutions_and_optimal_policies}
+
+Theorem {6.9.4}: repeat preceeding result.
+
+The optimal policy is not depended on $ \vec{\alpha} $.
+
+\subsection{Remain sections}%
+\label{sub:remain_section}
+Section {6.7}, {6.10} and {6.11} are tedious and difficult, I don't want waste my time.
+
+
