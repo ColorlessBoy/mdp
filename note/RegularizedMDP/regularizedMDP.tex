@@ -1,0 +1,164 @@
+\documentclass[a4paper]{article}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{tcolorbox}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+% newtheorem
+\newtheorem{assumption}{Assumption}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{corollary}{Corollary}
+\newtheorem{claim}{Claim}
+\newtheorem{example}{Example}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+
+\title{A Theory of Regularized MDPs}
+\author{Peng Lingwei}
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Regularized MDPs}%
+
+\begin{enumerate}
+    \item Regularized function: $ \Omega(\pi) $ is strongly convex;
+    \item Regularized value functions: $ V^{\pi, \Omega}(s) = V^{\pi} - \Omega(\pi(s))$
+        \begin{align*}
+            V^{\pi, \Omega}(s) =& \mathbb{E}^{\pi}\left[ \sum^{\infty}_{t=0} \gamma^t (r(S_t, A_t) - (1-\lambda)\Omega(\pi(s))) \vert S_0 = s \right] \\
+            =& \mathbb{E}^{\pi}\left[ \sum^{\infty}_{t=0} \gamma^t (r(S_t, A_t)) \vert S_0 = s \right] - \sum^{\infty}_{t=0} (1-\gamma) \Omega(\pi(s)) \\
+            =& V^{\pi}(s) - \Omega(\pi(s))
+        \end{align*}
+        In MDP, $ Q^{\pi}(s,a) = r(s,a) + \gamma \mathbb{E}_{P(s'|s,a)}\left[ V^{\pi}(s') \right] $. And $ V^{\pi} = T^{\pi}V^{\pi} = {\left( \langle \pi(s), Q^{\pi}(s, \cdot) \rangle \right)}_{s \in S} $. 
+        Then,let $ Q^{\pi, \Omega}(s,a) = r(s,a) + \gamma \mathbb{E}_{P(s'|s,a)}\left[ V^{\pi, \Omega}(s') \right] $,
+        \[
+            V^{\pi, \Omega}(s) = \langle \pi(s), Q^{\pi, \Omega}(s, \cdot) \rangle - (1-\gamma)\Omega(\pi(s))
+        \]
+    \item Regularized optimal value function: $ V^{*, \Omega}(s) = \max_{\pi \in \Pi^{MR}} V^{\pi}(s) - \Omega(\pi(s)) $
+        Let $ Q^{*, \Omega}(s, \cdot) = r(s,a) + \gamma \mathbb{E}_{P(s'|s,a)}\left[ V^{*,\Omega}(s') \right] $.
+        \begin{align*}
+            V^{*, \Omega}(s) =& \max_{\pi \in \Pi^{MR}} V^{\pi}(s) - \Omega(\pi(s))\\
+            =& \max_{\pi \in \Pi^{MR}} \langle \pi(s), Q^{\pi, \Omega}(s, \cdot) \rangle- (1 - \gamma)\Omega(\pi(s))\\
+            =& \max_{\pi \in \Pi^{MR}} \langle \pi(s), Q^{*, \Omega}(s, \cdot) \rangle- (1 - \gamma)\Omega(\pi(s)) \quad (\text{proof is trivial})\\
+            =& \Omega^{*}_{\gamma}(Q^{*,\Omega}(s,\cdot))
+        \end{align*}
+        where $ \Omega_{\gamma}^{*} $ is Legendre-Fenchel transform of $ (1-\gamma)\Omega $. More specifically,
+        \[
+            \forall q_s \in \mathbb{R}^{\left| A \right|}, \Omega_{\gamma}^{*}(q_s) 
+            = \max_{\pi \in \Pi^{MR}} \langle \pi_s, q_s \rangle - (1- \gamma) \Omega(\pi_s)
+        \]
+        
+    \item Regularized Bellman operator: $ T^{\pi,\Omega}V = T^{\pi} V - (1-\gamma)\Omega(\pi)$\\
+        \begin{itemize}
+            \item Let $ Q_V(s,a) = r(s,a) + \gamma \mathbb{E}_{P(s'|s,a)}\left[ V(s') \right] $,
+                \[
+                    T^{\pi,\Omega}V (s) = \langle \pi_s, Q_V(s, \cdot) \rangle - (1 - \lambda)\Omega(\pi_s)
+                \]
+            \item Monotonicity:$ V_1 \succeq V_2 \Rightarrow T^{\pi, \Omega}V_1 \succeq T^{\pi, \Omega}V_2 $
+                \[
+                    T^{\pi, \Omega}V_1 - T^{\pi, \Omega}V_2 = T^{\pi}V_1 - T^{\pi}V_2 \succeq \vec{0}
+                \]
+            \item Distributivity: $ T^{\pi, \Omega}(V + c \vec{1}) =  T^{\pi, \Omega}(V) + \gamma c \vec{1} $
+                \begin{align*}
+                    T^{\pi, \Omega}(V + c \vec{1}) =& T^{\pi}(V + c \vec{1}) - (1-\gamma)\Omega(\pi) \\
+                    =& T^{\pi}(V) + \gamma c \vec{1} - (1-\gamma)\Omega(\pi) = T^{\pi \Omega}V + \gamma c \vec{1}
+                \end{align*}
+                \item Contraction: $ \Arrowvert T^{\pi, \Omega}V_1 - T^{\pi, \Omega}V_2 \Arrowvert_{\infty} \le \gamma {\Arrowvert V_1 - V_2 \Arrowvert}_\infty $
+                    \[
+                        \Arrowvert T^{\pi, \Omega}V_1 - T^{\pi, \Omega}V_2 \Arrowvert_{\infty}
+                        = \Arrowvert T^{\pi}V_1 - T^{\pi}V_2 \Arrowvert_{\infty}
+                        \le \gamma \Arrowvert V_1 - V_2 \Arrowvert_{\infty}
+                    \]
+            \item $ T^{\pi,\Omega} $'s unique fixed point is $ V^{\pi, \Omega} $;
+                \begin{align*}
+                    T^{\pi, \Omega}V^{\pi, \Omega} =& T^{\pi}V^{\pi, \Omega} - (1 - \gamma) \Omega(\pi)\\
+                    =& T^{\pi}\left( V^{\pi} - \Omega(\pi) \right) - (1 - \gamma) \Omega(\pi)\\
+                    =& T^{\pi}(V^{\pi}) - \gamma \Omega(\pi) - (1-\gamma) \Omega(\pi)\\
+                    =& V^{\pi} - \Omega(\pi) = V^{\pi, \Omega}
+                \end{align*}
+        \end{itemize}
+    \item Regularized optimal Bellman operator: $ T^{*,\Omega}V = \max_{\pi \in \Pi^{MR}} T^{\pi,\Omega}V $;
+        \begin{align*}
+            T^{*,\Omega}V = \max_{\pi \in \Pi^{MR}} \langle \pi_s, Q_V(s, \cdot) \rangle - (1 - \lambda)\Omega(\pi_s)
+            = \Omega^{*}_{\gamma}( Q_{V}(s,\cdot))
+        \end{align*}
+        \begin{itemize}
+            \item Monotonicity: $ V_1 \succeq V_2 \Rightarrow T^{*,\Omega} V_1 \succeq T^{*, \Omega} V_2 $.\\
+                Let $ V_1 $'s optimal policy be $ \pi_1 $, and $ V_2 $'s be $ \pi_2 $.
+                \begin{align*}
+                    T^{*,\Omega} V_1 - T^{*, \Omega} V_2 =& \max_{\pi \in \Pi^{MR}} T^{\pi,\Omega}V_1 -  \max_{\pi \in \Pi^{MR}} T^{\pi,\Omega}V_2\\
+                    \succeq& T^{\pi_2, \Omega}V_1 - T^{\pi_2, \Omega}V_2 \succeq P^{\pi_2} (V_1 - V_2) \succeq \vec{0}
+                \end{align*}
+            \item Distributivity: $ T^{*,\Omega}(V + c \vec{1}) = T^{*, \Omega}V + \gamma c \vec{1} $.
+            \item Contraction: $ {\Arrowvert T^{*, \Omega}V_1 - T^{*, \Omega}V_2 \Arrowvert}_\infty \preceq \gamma {\Arrowvert V_1 - V_2 \Arrowvert}_\infty $
+                \begin{align*}
+                    {\Arrowvert T^{*, \Omega}V_1 - T^{*, \Omega}V_2 \Arrowvert}_\infty
+                    \le {\Arrowvert T^{\pi_1,\Omega} V_1 - T^{\pi_1, \Omega}V_2 \Arrowvert}_\infty
+                    \le {\Arrowvert T^{\pi_1} V_1 - T^{\pi_1} V_2 \Arrowvert}_\infty
+                    \le \gamma {\Arrowvert V_1 - V_2 \Arrowvert}_\infty
+                \end{align*}
+            \item $ T^{*, \Omega} $'s unique fixed point is $ V^{*,\Omega} $. (We talk about $ \sup $ instead of $ \min $)\\
+                First we proof $ V \succeq T^{*,\Omega} V \Rightarrow V \succeq V^{*,\Omega}$:
+                \begin{align*}
+                    &\forall \pi, \quad 
+                    V \succeq \sup_{\pi' \in \Pi^{MR}} T^{\pi', \Omega} V \succeq r^\pi + \gamma P^{\pi} V - (1-\gamma) \Omega(\pi)\\
+                    \Rightarrow& V \succeq {(I - \gamma P^{\pi})}(r^{\pi} - (1-\gamma)\Omega(\pi)) = V^{\pi,\Omega}
+                    \quad \Rightarrow V \succeq V^{*, \Omega}
+                \end{align*}
+                Second we proof $ V \preceq T^{*,\Omega} V \Rightarrow V \preceq V^{*,\Omega}$:
+                By definition of $ \sup $,
+                \[
+                    \forall \epsilon, \exists \pi \in \Pi^{MR}, V \preceq T^{\pi, \Omega}V + \epsilon \cdot \vec{1}
+                    \Rightarrow V \preceq {(I - \lambda P^{\pi})}^{-1} [r^{\pi} - (1-\gamma)\Omega(\pi) + \epsilon \cdot \vec{1}] 
+                \]
+                \[
+                    V \preceq {(I - \lambda P^{\pi})}^{-1} [r^{\pi} - (1-\gamma)\Omega(\pi)] + \frac{\epsilon}{1 - \gamma} \vec{1} \preceq V^{*, \Omega} + \frac{\epsilon}{1 - \gamma} \vec{1}
+                \]
+        \end{itemize}
+    \item Assume that $ \Omega_L \le \Omega \le \Omega_U $, then $ V^{\pi} - \Omega_U \le V^{\pi, \Omega} \le V^{\pi} - \Omega_L $.
+        \[
+             \max_{\pi \in \Pi^{MR}} V^{\pi} - \Omega_U \le \max_{\pi \in \Pi^{MR}} V^{\pi, \Omega} \le \max_{\pi \in \Pi^{MR}} V^{\pi} - \Omega_L \Rightarrow V^{*} - \Omega_U \le V^{*, \Omega} \le V^{*} - \Omega_L
+        \]
+        Furthermore,
+        \begin{align*}
+            &V^{*} \le V^{*, \Omega} + \Omega_U = V^{\pi^{*, \Omega}, \Omega} + \Omega_U \le V^{\pi^{*,\Omega}} + \Omega_U - \Omega_L \\
+            \Rightarrow& V^* - \left( \Omega_U - \Omega_L \right) \le V^{\pi^{*, \Omega}} \le V^{*}
+        \end{align*}
+\end{enumerate}
+
+\section{Negative entropy}%
+
+A classical example is the negative entropy $ \Omega(\pi_s) = {(1 - \gamma)}^{-1}\sum^{}_{a} \pi_s(a) \ln \pi_s(a) $.
+
+\begin{align*}
+    \Omega^{*}_{\gamma}(q_s) =& \max_{\pi \in \Pi^{MR}} \langle \pi_s, q_s \rangle - \sum^{}_{a} \pi_s(a) \ln \pi_s(a)\\
+\end{align*}
+
+We change it into 
+\begin{align*}
+    -\Omega^{*}_{\gamma}(q_s) =& \min_{\pi_{s} \succeq \vec{0}} \max_{\alpha \ne 0} \alpha \left(\sum^{}_{a} \pi_s(a) - 1 \right)-\langle \pi_s, q_s \rangle + \sum^{}_{a} \pi_s(a) \ln \pi_s(a)\\
+    =& \max_{\alpha \ne 0} \min_{\pi_s \succeq \vec{0}} \alpha \left(\sum^{}_{a} \pi_s(a) - 1 \right)-\langle \pi_s, q_s \rangle + \sum^{}_{a} \pi_s(a) \ln \pi_s(a)\\
+    \Rightarrow&  \alpha - q_s(a) + \ln \pi_{s}(a) + 1 = 0,\quad \sum^{}_{a} \pi_{s}(a) = 1 \\
+    \Rightarrow& \sum^{}_{a} \exp\left\{ -1 + q_{s}(a) - \alpha \right\} = 1
+    \Rightarrow \alpha + 1 = \ln \sum^{}_{a} \exp\left\{ q_s(a) \right\}\\
+    \Rightarrow& \pi_s(a) = \frac{\exp \left\{q_{s}(a) \right\}}{\sum^{}_{a} \exp\left\{ q_s(a) \right\}} 
+\end{align*}
+\[
+    \Omega^{*}_{\gamma}(q_s) = \ln \sum^{}_{a} \exp q_s(a) \Rightarrow \nabla \Omega^*_{\gamma}(q_s) = \frac{\exp\left\{ q_s(a) \right\}}{ \sum^{}_{a} \exp\left\{ q_s(a) \right\}} = \pi^*_s(a)
+\]
+
+
+\section{Regularized Modified Policy Iteration}%
+
+
+
+\end{document}
