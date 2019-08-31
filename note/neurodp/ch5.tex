@@ -1,0 +1,136 @@
+% Chapter5 Sinulation Methods for a Lookup Table Representation, Neuro Dynamic Programming.
+
+\section{Sinulation Methods for a Lookup Table Representation}%
+
+
+\subsection{SOME ASPECTS OF MONTE CARLO SIMULATION}%
+
+Suppose that v is a random variable with an unknown mean $ m $ that we wish to estimate.
+Monte-Carlo simulation is to generate a number of samples $ \left\{ v_1, \ldots, v_N \right\} $,
+and estimate the mean of v by forming the sample mean
+\[
+    M_N = \frac{1}{N} \sum^{N}_{k=1} v_k = M_{N-1} + \frac{1}{N} (v_{N} - M_N).
+\]
+
+\textbf{(The Case of i.i.d. Samples)}:
+\begin{itemize}
+    \item $ \mathbb{E}\left[ M_N \right] = \frac{1}{N}  \sum^{N}_{k=1} \mathbb{E}\left[ v_k \right] = m $;
+    \item $ Var(M_N) = \frac{1}{N^2} \sum^{N}_{k=1} Var(v_k) = \frac{\sigma^2}{N}  $.
+\end{itemize}
+
+\textbf{(The Case of Dependent Samples)}:
+\begin{itemize}
+    \item The estimator of mean remains unbiased;
+    \item We can use a weighted average to lower the variance.
+\end{itemize}
+
+\textbf{(The Case of a Random Sample Size)}:
+
+In this case, the number of samples N is itself a random variable.
+
+If N is correlated with $ \left\{ v_1, \ldots, v_N \right\} $. Then the sample mean is unbiased, and the variance is $ \sigma^2 \mathbb{E}\left[ 1/N \right] $.
+
+If N is correlated with $ \left\{ v_1, \ldots, v_N \right\} $, the sample mean maybe biased.
+
+\begin{theorem}
+If $ \left\{ v_1, \ldots, v_N \right\} $ is {i.i.d.} with finite mean, N depends upon given sequence, and $ \mathbb{E}\left[ N \right] < \infty $.
+\begin{align*}
+    & \mathbb{E}\left[ \sum^{N}_{k=1} v_k \right] = \sum^{\infty}_{k=1} P(N \ge k) \mathbb{E} \left[ v_k | N \ge k \right]
+    = \mathbb{E}\left[ v_1 \right] \sum^{\infty}_{k=1} P\left( N \ge k \right)\\
+    =& \mathbb{E} [v_1] \sum^{\infty}_{k = 1} \sum^{\infty}_{n=k} P(N = n)
+    = \mathbb{E}\left[ v_1 \right] \sum^{\infty}_{n=1} \sum^{n}_{k=1} P(N = n) = \mathbb{E}\left[ v_1 \right] \mathbb{E}\left[ N \right].
+\end{align*}
+\end{theorem}
+
+\subsection{POLICY EVALUATION BY MONTE CARLO SIMULATION}%
+
+\begin{itemize}
+    \item State space: $ \left\{ 0, 1, \ldots, n \right\} $, where 0 is a cost-free absorbing state;
+    \item The policy $ \pi $ is proper;
+    \item For $ m $th trajectory is $ (s^m_0, s^m_1, \ldots, s^m_N) $;
+    \item Cost of trajectory is $ c(s^m_0, m) = \sum^{N-1}_{t=1} g(s^m_t, s^m_{t+1}) $;
+    \item Policy value: $ J^{\pi}(s) = \mathbb{E}^{\pi}\left[ c(s, m) \right] $.
+\end{itemize}
+
+\textbf{Algorithm1}:
+\[
+    \tilde J(i) = \frac{1}{K} \sum^{K}_{m=1} c(i,m)
+\]
+\[
+    \tilde J^m(i) = \tilde J^{m-1}(i) + \frac{1}{m} (c(i,m) - \tilde J^{m-1}(i)), \quad s.t. J^{0}(i) = 0.
+\]
+
+\textbf{Algorithm2}:
+Use the full trajectory.
+\[
+    J(i_k) = J(i_k) + \gamma(i_k) (g(i_k, i_k+1) + \cdots + g(i_{N-1}, i_N) - J(i_k))
+\]
+
+\textbf{Every-visit method} provides a biased estimator.
+
+\textbf{Consistency of the Every-Visit Method}
+
+Let $ c(s, k, m) $ mean, in $ m $th trajectory, the cost after visiting state $ s $ $ k $th times. And $ n^m_s $ means the total number of state s in $ m $th trajectory. Then every-visit method estimator is
+\[
+    \tilde J(s) = \frac{ \sum^{K}_{m=1} \sum^{n^m_s}_{k = 1} c(s, k, m) }{ \sum^{K}_{m=1} n^m_s} 
+\]
+When K is fixed, the extimator is biased. But if $ K \rightarrow \infty $, the estimator is unbiased:
+\[
+    \mathbb{E} \left[ \tilde J(s) \right] = \frac{\mathbb{E}\left[ \sum^{n^m_k}_{k = 1} c(s, k, m) | n_k \ge 1  \right]}{ \mathbb{E} \left[ n_k | n_k \ge 1 \right]} = \mathbb{E}\left[ c(s, 1, m) | n_k \ge 1 \right] = J^{\pi}(s)
+\]
+
+\textbf{The First-Visit Method}
+\[
+    \tilde J (s) = \frac{ \sum^{}_{m:n^m_s \ge 1} c(s, 1, m) }{ \sum^{K}_{m = 1} 1_{\left[ n^{m}_{s} \ge 1 \right]} } 
+\]
+which is unbiased.
+
+The significance of the comparison of the every-visit and first-visit methods should not be overemphasized. For problems with large state space, the likelihood of a trajectory visiting the same state twice is usually quite small.
+
+\subsubsection{Q-Factors and Policy Iteration}%
+
+\[
+    Q^{\pi}(s,a) = \sum^{}_{s' \in S} p_{s, s'}(a) (g(s, a, s') + J^{\pi}(s'))
+\]
+
+\subsection{TEMPORAL DIFFERENCE METHODS}%
+
+{TD}: policy evaluation.
+
+$ J^{m}_{k+1}(s^m_k) = J^{m}_{k}(s^m_k) + \gamma(g(s^m_k, s^m_{k+1}) + \cdots + g(s^{m}_{N-1}, s^{m}_{N}) - J^m_{k}(i_k)) $
+\begin{align*}
+    J^{m}_{k+1}(s^m_k) = J^{m}_{k}(s^m_k) + \gamma [ &
+    (g(s^m_k, s^m_{k+1}) + J^m_{k+1}(s^m_{k+1}) - J^{m}_{k}(s^m_{k})) \\
+    &+ (g(s^m_{k+1}, s^m_{k+2}) + J^m_{k+2}(s^m_{k+2}) - J^{m}_{k+1}(s^m_{k+1})) \\
+    &+ \cdots \\
+    &+ (g(s^m_{N-1}, s^m_{N}) + J^m_{N}(s^m_{N}) - J^{m}_{N-1}(s^m_{N-1}))
+    ]
+\end{align*}
+where we have made use of $ J(s_N) = 0 $.
+\[
+    J^{m}_{k+1}(s^m_k) = J^{m}_{k}(s^m_k) + \gamma(d^{m}_{k} + d^{m}_{k+1} + \cdots + d^{m}_{N-1}),
+\]
+\[
+    d^m_{k} = g(s^m_k, s^{m}_{k+1}) + J^{m}_{k+1}(s^m_{k+1}) - J^{m}_{k}(s^m_k)
+\]
+
+Make explanation complex, maybe approximation TD is more easy to understanding.
+
+\section{Approximate DP with Cost-to-Go Function Approximation}%
+
+This chapter is the core target I read this book.
+
+The lookup table representation can be viewed as a limiting form of an appproximate representation.
+
+\subsection{GENERRIC ISSUES-FROM PARAMETERS TO POLICIES}%
+
+\subsection{APPROXIMATE POLICY ITERATION}%
+
+\subsubsection{Approximate Policy Iteration Based on Monte Carlo Simulation}%
+
+
+
+
+
+
+
