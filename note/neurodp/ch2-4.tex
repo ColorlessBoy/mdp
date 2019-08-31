@@ -1,0 +1,285 @@
+% Neuro Dynamic Programming
+
+\section{Introduction}%
+
+\section{Dynamic Programming}%
+
+\begin{definition}
+    \textbf{(Proper stationary policy).} (Reach termination state 0 w.p.1)
+    \[
+       \rho^{\pi} = \max_{i = 1, \ldots, n} P^{\pi} \left\{ s_n \ne 0 | i_0 = i \right\} < 1
+    \]
+\end{definition}
+
+In stochastic shortest path problems, we have two assumptions:
+\begin{itemize}
+    \item There exists at least one proper policy;
+    \item For every improper policy $ \pi $, the corresponding cost-to-oo $ J^{\pi}(i) $ is infinite for at least one state i.
+\end{itemize}
+
+\textbf{Policy Iteration as an Actor-Critic System}
+
+\begin{itemize}
+    \item Critic: policy evaluation;
+    \item actor: policy improvement.
+\end{itemize}
+
+\section{Neural Network Architectures and Training}%
+
+Trivial. Using some function to approximate $ V^{\pi}, V^{*}, Q^{\pi}, Q^{*} $.
+This book uses neural network.
+
+\section{Stochastic Iterative Algorithms}%
+
+Suppose that we are interested in solving a system of equations of the form
+\[
+    Hr = r,
+\]
+where $ H $ is a function from $ \mathbb{R}^{n} $ into itself.
+If $ Hr = r - \nabla f(r) $, the solution of the system $ Hr = r $ is of the form
+\[
+    \nabla f(r) = 0,
+\]
+Then it's sometime minimize the cost function $ f $.
+
+One possible algorithm for solving the system $ Hr = r $ is provided by the iteration
+\[
+    r_{t+1} = H r_{t}, \quad or \quad r_{t+1} = (1 - \gamma)r_{t} + \gamma H r_{t}.
+\]
+the second method reduces to the gradient method if $ Hr = r - \nabla f(r) $.
+
+Sometimes an exact evaluation of $ Hr $ is difficult but that we have access to a random variable s of the form $ s = Hr + w $, where w is a random noise term.
+Then we obtain stochastic iterative or stochastic approximation algorithm
+\[
+    r_{t+1} = (1 - \gamma)r + \gamma(Hr + w).
+\]
+
+A more concrete setting is obtained as follows. Let $ v $ be a random variable with a known probability distribution $ p(v|r) $ that depends on r. Suppose that we are interested in solving:
+\[
+    \mathbb{E}_{v \sim p(v|r) } \left[ g(r,v) \right] = r,
+\]
+where g is a known function.
+We can use preceeding algorithm:
+\[
+    r_{t+1} = (1 - \gamma) r_{t} + \gamma \mathbb{E}_{v \sim p(v|r)} \left[ g(r,v) \right].
+\]
+We can estimate $ \mathbb{E}_{v \sim p(v|r)} \left[ g(r,v) \right] \approx \frac{1}{k}  \sum^{k}_{i=1} g(r, \tilde v_i)$.
+We get Robbins-Monro stochastic approximation algorithm ($ k=1 $),
+\[
+    r_{t+1} = (1 - \gamma) r_{t} + \gamma g(r, \tilde v),
+\]
+which is a special case of the algorithm $ r_{t+1} = (1 - \gamma)r_{t} + \gamma \left( Hr_{t} + w \right) $,
+where $ Hr = \mathbb{E}_{v\sim p(v|r)}\left[ g(r,v) \right] $, and $ w = g(r, \tilde v) - \mathbb{E}\left[ g(r,v) \right] $.
+
+\subsection{THE BASIC MODEL}%
+
+Let $ T^i $ be the set of times at which $ r(i) $ updates:
+\[
+    r_{t+1}(i) =
+    \begin{cases}
+        r_t(i), & t \notin T^i\\
+        (1 - \gamma_t(i))r_t(i) + \gamma_t(i) \left( (Hr_t)(i) + w_t(i) \right),& t \in T^i
+    \end{cases}
+\]
+
+Assumption: $ \sum^{\infty}_{t=0} \gamma_t(i) = \infty $ and $ \sum^{\infty}_{t=0} \gamma^2_t(i) < \infty $.
+
+\subsection{CONVERGENCE BASED ON A SMOOTH POTHENTIAL FUNCTION}%
+
+\[
+    r_{t+1} = r_t + \gamma_t \delta_t, \quad \delta_t = H r_t - r_t + w_t.
+\]
+Let $ \mathcal{H}_t $ denote the history of the algorithm
+\[
+    \mathcal{H}_t = \left\{ r_0, \ldots, r_t, \delta_0, \ldots, \delta_{t-1}, \gamma_0, \ldots, \gamma_t \right\}.
+\]
+
+\begin{assumption}
+    Exist function $ f: \mathbb{R}^{n} \mapsto \mathbb{R} $, with the following properties:
+    \begin{enumerate}
+        \item $ \forall \mathbb{R}^{n}, f(r) \ge 0 $;
+        \item $ \Arrowvert \nabla f(r_1) - \nabla f(r_2) \Arrowvert \le L {\Arrowvert r_1 - r_2 \Arrowvert}_2 $;
+        \item (Pseudogradient property) $ c {\Arrowvert \nabla f(r_t) \Arrowvert}^2_2 + \langle \nabla f(r_t), \mathbb{E}\left[ \delta_t | \mathcal{H}_t \right] \rangle \le 0$
+        \item $ \mathbb{E}\left[ {\Arrowvert \delta_t \Arrowvert}_2^2 | \mathcal{H}_t \right] \le K_1 + K_2 {\Arrowvert \nabla f(r_t) \Arrowvert}^2_2 $
+    \end{enumerate}
+\end{assumption}
+
+\begin{proposition}
+    Consider the algorithm $ r_{t+1} = r_{t} + \gamma_t s_t $, if $ \sum^{\infty}_{t=0} \gamma_t = \infty $ and $ \sum^{\infty}_{t=0} \gamma^{2}_t < \infty $.
+    Under preceeding assumption, the following hold with probability 1:
+    \begin{itemize}
+        \item The sequence $ f(r_t) $ converges;
+        \item $ \lim_{t \to \infty} \nabla f(r_t) = 0 $;
+        \item Every limit point of $ r_t $ is a stationary point of f.
+    \end{itemize}
+\end{proposition}
+
+\begin{example}
+    \textbf{(Stochastic Gradient Algorithm).}
+    \[
+       r_{t+1} = r_{t} + \gamma_t \delta_t, \quad \delta_t = - \left( \nabla f(r_t) + w_t \right)   
+    \]
+    Assumption:
+    \begin{enumerate}
+        \item $ \sum^{\infty}_{t=0} \gamma_t = \infty, \quad \sum^{\infty}_{t=0} \gamma^2_{t} < \infty $;
+            \item f is nonnegative and has a Lipschitz continuous gradient;
+            \item $ \mathbb{E}\left[ w_t | \mathcal{H}_t \right] = 0,\quad \mathbb{E}\left[ \Arrowvert w_t \Arrowvert^2 | \mathcal{H}_t \right] \le A + B {\Arrowvert \nabla f(r_t) \Arrowvert}^2_2 $;
+    \end{enumerate}
+    We proof Assumption 1 is satisfied.
+    \[
+        \langle \nabla f(r_t), \mathbb{E}\left[ \delta_t | \mathcal{H}_t \right] \rangle
+        = \langle \nabla f(r_t), -\nabla f(x_t) - \mathbb{E}\left[ w_t | \mathcal{H}_t \right] \rangle
+        = - {\Arrowvert \nabla f(r_t) \Arrowvert}_2^2
+    \]
+    \begin{align*}
+        \mathbb{E}\left[ {\Arrowvert \delta_t \Arrowvert}_2^2 | \mathcal{H}_t \right]
+        =& {\Arrowvert \nabla f(r_t) \Arrowvert}_2^2 + \mathbb{E}\left[ \Arrowvert w_t \Arrowvert_2^2 | \mathcal{H}_t \right] + \langle 2 \nabla f(r_t), \mathbb{E}\left[ w_t | \mathcal{H}_t \right] \rangle\\
+        =& \Arrowvert \nabla f(r_t) \Arrowvert^2_2 + A + B \Arrowvert \nabla f(r_t) \Arrowvert^2_2\\
+        =& A + (B+1) \Arrowvert \nabla f(r_t) \Arrowvert^2_2
+    \end{align*}
+\end{example}
+
+\begin{example}
+    \textbf{(Estimate of an Unknown Mean).}
+    For random variables $ v $ with unknow mean $ \mu $ and unit variance.
+    \[
+        r_{t+1} = (1 - \gamma_t) r_t + \gamma_t v_t.
+    \]
+    with assumption
+    \begin{enumerate}
+        \item $ \sum^{\infty}_{t=0} \gamma_t = \infty $ and $ \sum^{\infty}_{t=0} \gamma^2_t < \infty $;
+    \end{enumerate}
+    \begin{proof}
+        \[
+            r_{t+1} = r_t - \gamma_t (r_t - \mu) + \gamma_t(v_t - \mu)
+        \]
+        where $ f(r) = {(r - \mu)}^{2}/2  $, $ \nabla f(r_t) = (r_t - \mu) $.
+        (The other assumptions in stochastic gradient algorithm are sastified naturally.)
+    \end{proof}
+\end{example}
+
+\begin{example}
+    \textbf{(Euclidean Norm Pseudo-Contractions).}
+    \[
+        r_{t+1} = (1 - \gamma_t) r_t + \gamma_t (H r_t + w_t),
+    \]
+    Assuming:
+    \begin{enumerate}
+        \item $ {\Arrowvert Hr - r^* \Arrowvert}_2 \le \beta {\Arrowvert r - r^* \Arrowvert}_2, \forall r \in \mathbb{R}^{n} $, $ 0 \le \beta < 1 $;
+        \item $ \mathbb{E}\left[ w_t | \mathcal{H}_t \right] = 0 $;
+            \item $ \mathbb{E} \left[ {\Arrowvert w_t \Arrowvert}^2_2 | \mathcal{H}_t  \right] \le A + B {\Arrowvert r_t - r^* \Arrowvert}^2_2 $
+    \end{enumerate}
+
+    The potential function is $ f(r) = \frac{1}{2} \Arrowvert r - r^* \Arrowvert^2_2. $, $ \delta_t = - r_t + H r_t + w_t $, then $ \mathbb{E} \left[ \delta_t | \mathcal{H}_t \right] = H r_t - r_t $.
+    \begin{align*}
+        \langle Hr - r^*, r - r^* \rangle \le& {\Arrowvert Hr - r^* \Arrowvert}_2 \Arrowvert r - r^* \Arrowvert_2 \le \beta {\Arrowvert r - r^* \Arrowvert}^2_2\\
+        \langle Hr - r, r - r^* \rangle \le& -(1 - \beta) \Arrowvert r - r^* \Arrowvert^2_2\\
+        \langle \mathbb{E} \left[ \delta_t | \mathcal{H}_t \right], \nabla f(r_t) \rangle \le& -(1-\beta) \Arrowvert \nabla f(r_t) \Arrowvert^2_2
+    \end{align*}
+    \[
+    \mathbb{E}\left[ \delta^2_t | \mathcal{H}_t \right] = \mathbb{E}\left[ {(-r_t + H r_t)}^2 | \mathcal{H}_t \right] + \mathbb{E}\left[ \Arrowvert w_t \Arrowvert^2 | \mathcal{H}_t \right] \\
+    \le {(H r_t - r_t)}^2 + A + B {\Arrowvert r_t - r^* \Arrowvert}_2^2
+    \]
+\end{example}
+
+\subsubsection{Convergence Proofs}%
+\label{ssub:convergence_proofs}
+
+In this section, we discarded a suitable set of measure zero, and don't keep repeating the qualification `` with probability 1''.
+
+\begin{theorem}
+    \textbf{(Supermartingale Convergence Theorem).}
+    Here is three sequences of random variables $ \left\{ X_t \right\}, \left\{ Y_t \right\} and \left\{ Z_t \right\} $.
+    And let $ \mathcal{F}_t $ be set of random variables and $ \mathcal{F}_t \subset \mathcal{F}_{t+1} $.
+    Suppose that
+    \begin{enumerate}
+        \item $ X_t, Y_t, Z_t $ are nonegative, and are functions of the random variables in $ \mathcal{F}_t $;
+        \item $ \forall t $, we have $ \mathbb{E} \left[ Y_{t+1} | \mathcal{F}_t \right] \le Y_t - X_t + Z_t $;
+        \item $ \sum^{\infty}_{t=0} Z_t < \infty $.
+    \end{enumerate}
+    Then we have $ \sum^{\infty}_{t = 0} X_t < \infty $, and the sequence $ Y_t $ converges to a nonegative random variable $ Y $, w.p.1.
+\end{theorem}
+
+\begin{theorem}
+    \textbf{(Martigale Convergence Theorem)}
+    Let $ \{ X_t \} $ be a sequence of random variables and let $ \mathcal{F}_t $ be set of random variables such that $ \mathcal{F}_t \subset \mathcal{F}_{t+1} $.
+    Suppose that:
+    \begin{enumerate}
+        \item The random variable $ X_t $ is a function of the random variable in $ \mathcal{F}_t $;
+        \item $ \mathbb{E}\left[ X_{t+1} | \mathcal{F}_t \right] = X_t $,
+        \item $ \exists M < \infty $ such that $ \mathbb{E}\left[ \left| X_t \right| \right] \le M $.
+    \end{enumerate}
+    Then, the sequence $ X_t $ converges to a random variable $ X $, w.p.1.
+
+    Now we begin proof the preceeding section.
+    \begin{proof}
+        By assumption, we have $ {\Arrowvert \nabla f(r_1) - \nabla f(r_2) \Arrowvert}_2 \le L \Arrowvert r_1 - r_2 \Arrowvert $, we have
+        \[
+            f(r_{t+1}) \le f(r_t) + \gamma_t \langle \nabla f(r), \delta_t \rangle + \frac{L}{2} \gamma^2_t {\Arrowvert \delta_t \Arrowvert}_2^2
+        \]
+        \begin{align*}
+            \mathbb{E} \left[ f(r_{t+1} | \mathcal{F}_t) \right]
+            \le& f(r_t) + \gamma_t \langle \nabla f(r_t), \mathbb{E} \left[ \delta_t | \mathcal{F}_t \right] \rangle + \frac{L}{2} \gamma^2_t \left( K_1 + K_2 \Arrowvert \nabla f(r_t) \Arrowvert^2_2 \right)\\
+            \le& f(r_t) - \gamma_t \left( c - \frac{L K_2 \gamma_t}{2}  \right) \Arrowvert \nabla f(r_t) \Arrowvert^2_2 + \frac{L K_1 \gamma^2_t}{2} \\
+            =& f(r_t) - X_t + Z_t,
+        \end{align*}
+        where
+        \[
+            X_t =
+            \begin{cases}
+                \gamma_t \left( c - \frac{L K_2 \gamma_t}{2}  \right) \Arrowvert \nabla f(r_t) \Arrowvert^2_2, & if\ LK_2\gamma_t \le 2c, \\
+                0, & otherwise.
+            \end{cases}
+        \]
+        and
+        \[
+            Z_t = 
+            \begin{cases}
+                \frac{L K_1 \gamma^2_t}{2}, & if\ LK_2 \gamma_t \le 2c,\\
+                \frac{L K_1 \gamma^2_t}{2} - \gamma_t \left( c - \frac{L K_2 \gamma_t}{2}  \right) \Arrowvert \nabla f(r_t) \Arrowvert^2_2, & otherwise
+            \end{cases}
+        \]
+        Because $ \sum^{\infty}_{t=0} \gamma^2_t < \infty $, so after some finite time $ LK_2 \gamma_t \le 2c $, and $ Z_t = LK_1 \gamma^2_t / 2 $, and therefore $ \sum^{\infty}_{t=0} Z_t < \infty $.
+        Thus, the supermartingale convergence theorem applies and shows that $ f(r_t) $ converges and $ \sum^{\infty}_{t=0} X_t < \infty $.
+
+        Because $ X_t = \gamma_t \left( c - \frac{LK_2 \gamma_t}{2}  \right) {\Arrowvert \nabla f(r_t) \Arrowvert}_2^2 \ge \frac{c}{2} \gamma_t \Arrowvert \nabla f(r_t) \Arrowvert^2_2 $ after some finite time. Hence
+        \[
+            \sum^{\infty}_{t=0} \gamma_t \Arrowvert \nabla f(r_t) \Arrowvert^2_2 < \infty
+        \]
+        Because $ \sum^{\infty}_{t=0} \gamma_t = \infty $, $ \liminf_{t \rightarrow \infty} {\Arrowvert \nabla f(r_t) \Arrowvert}_2 = 0 $
+        
+        Let us denote $ \bar s_t = \mathbb{E}\left[ s_t | \mathcal{F}_t \right] $ and $ w_t = s_t - \bar s_t $, then
+        \[
+            \Arrowvert \bar s_t \Arrowvert^2_2 + \mathbb{E} \left[ {\Arrowvert w_t \Arrowvert}_2^2 | \mathcal{F}_t \right] = \mathbb{E} \left[ \Arrowvert s_t \Arrowvert^2_2 | \mathcal{F}_t \right] \le K_1 + K_2 {\Arrowvert \nabla f(r_t) \Arrowvert}_2^2
+        \]
+        
+        We need take a break and proof another lemma
+        \begin{lemma}
+            $ u_t = \sum^{t-1}_{\tau = 0} \chi_\tau \gamma_\tau w_{\tau} $, converges w.p.1.
+            where $ \chi_t = 1_{\left[ {\Arrowvert \nabla f(r_t) \Arrowvert}_2 \le \epsilon \right]} $.
+            \begin{proof}
+                We start the assumption $ \sum^{\infty}_{t=0} \gamma^2_t \le A < \infty $.
+                \[
+                    \mathbb{E}\left[ \chi_t \gamma_t w_t | \mathcal{F}_t \right] = \chi_t \gamma_t \mathbb{E}\left[ w_t | \mathcal{F}_t \right] = 0 \Rightarrow \mathbb{E}\left[ u_{t+1} | \mathcal{F}_t \right] = u_t
+                \]
+                If $ \chi_t = 0 $, then $ \mathbb{E}\left[ \Arrowvert u_{t+1} \Arrowvert^2_2 | \mathcal{F}_t \right] = \Arrowvert u_t \Arrowvert^2 $. If $ \chi_t = 1 $, we have
+                \[
+                    \mathbb{E}\left[ \Arrowvert u_{t+1} \Arrowvert^2_2 | \mathcal{F}_t \right]
+                    = {\Arrowvert u_t \Arrowvert}_2^2 + \gamma^2_t \mathbb{E}\left[ {\Arrowvert w_t \Arrowvert}_2^2 | \mathcal{F}_t \right] \le {\Arrowvert u_t \Arrowvert}_2^2 + \gamma^2_t (K_1 + K_2 \epsilon^2)
+                \]
+                \[
+                    \mathbb{E}\left[ {\Arrowvert u_t \Arrowvert}_2^2 \right] \le (K_1 + K_2 \epsilon^2) \mathbb{E} \left[ \sum^{t-1}_{\tau = 0} \gamma^2_\tau \right] \le (K_1 + K_2 \epsilon^2)A
+                \]
+                \[
+                    \sup_t \mathbb{E}\left[ {\Arrowvert u_t \Arrowvert}^2 \right] \le \sup_t \mathbb{E} \left[ 1 + \Arrowvert u_t \Arrowvert^2_2 \right] < \infty
+                \]
+                Then we can use Martigale convergence theorem to $ u_t $ and get that $ u_t $ converges, w.p.1.
+                
+                We can assume that $ \sum^{t-1}_{\tau = 0} \gamma^2_\tau \le A < \infty $ and get the same result.
+            \end{proof}
+        \end{lemma}
+        \textbf{I give up today.}.
+    \end{proof}
+\end{theorem}
+
+
