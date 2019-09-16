@@ -156,9 +156,221 @@ We change it into
     \Omega^{*}_{\gamma}(q_s) = \ln \sum^{}_{a} \exp q_s(a) \Rightarrow \nabla \Omega^*_{\gamma}(q_s) = \frac{\exp\left\{ q_s(a) \right\}}{ \sum^{}_{a} \exp\left\{ q_s(a) \right\}} = \pi^*_s(a)
 \]
 
+\section{Error Bounds for Approximate Policy Iteration}%
+
+\subsection{KEY BOUND THEOREM}%
+
+\begin{enumerate}
+    \item $ e_k = V_k - V^{\pi_k} $
+    \item $ g_k = V^{\pi_{k+1}} - V^{\pi_k} $
+    \item $ l_k = V^* - V^{\pi_k} $
+    \item $ b_k = V_k - T^{\pi_k} V_k $
+        \item $ \pi_{k+1} = \max_{\pi} T^{\pi} V_k $
+\end{enumerate}
+Target: bound $ l_k $.
+\begin{lemma}
+    \[
+        l_{k+1} \preceq \gamma P^{\pi^*}l_k + \gamma \left\{  P^{\pi_{k+1}}{( I - \gamma P^{\pi_{k+1}})}^{-1}  - P^{\pi^*} {(I - \gamma P^{\pi_k})}^{-1}\right\} b_k
+    \]
+    \[
+        l_{k+1} \preceq \gamma P^{\pi^*} l_k + \gamma \left\{ P^{\pi_{k+1}}{( I - \gamma P^{\pi_{k+1}})}^{-1} (I - \gamma P^{\pi_k}) - P^{\pi^*} \right\} e_k
+    \]
+    
+    \begin{proof}
+        \begin{align*}
+            g_k =& T^{\pi_{k+1}} V^{\pi_{k+1}} - T^{\pi_{k+1}} V^{\pi_k} + T^{\pi_{k+1}} V^{\pi_k} - T^{\pi_{k+1}}V_k\\
+            & + T^{\pi_{k+1}} V_k - T^{\pi_k} V_k + T^{\pi_k} V_k - T^{\pi_k} V^{\pi_k} \\
+            \succeq& \gamma P^{\pi_{k+1}} (V^{\pi_{k+1}} - V^{\pi_k}) + \gamma P^{\pi_{k+1}}(V^{\pi_k} - V_k) + \gamma P^{\pi_k}(V_k - V^{\pi_k}) \\
+            \succeq& - \gamma {(I - \gamma P^{\pi_{k+1}})}^{-1} (P^{\pi_{k+1}} - P^{\pi_k})e_k
+        \end{align*}
+        \begin{align*}
+            e_k - g_k \preceq& \left[ I + \gamma {(I - \gamma P^{\pi_{k+1}})}^{-1} (P^{\pi_{k+1}} - P^{\pi_k}) \right] e_k\\
+            =& {(I - \gamma P^{\pi_{k+1}})}^{-1} (I - \gamma P^{\pi_k}) e_k
+        \end{align*}
+        \begin{align*}
+            l_{k+1} =& T^{\pi^*} V^* - T^{\pi^*} V^{\pi_k} + T^{\pi^*} V^{\pi_k} - T^{\pi^*} V_k + T^{\pi^*} V_k - T^{\pi_{k+1}}V_k \\
+            &+ T^{\pi_{k+1}}V_k - T^{\pi_{k+1}}V^{\pi_k} + T^{\pi_{k+1}}V^{\pi_k} - T^{\pi_{k+1}} V^{\pi_{k+1}} \\
+            \preceq& \gamma P^{\pi^*} (V^{*} - V^{\pi_k}) + \gamma P^{\pi^*}(V^{\pi_k} - V_k) + \gamma P^{\pi_{k+1}} (V_k - V^{\pi_k}) + \gamma P^{\pi_{k+1}} (V^{\pi_k} - V^{\pi_{k+1}})\\
+            =& \gamma P^{\pi^*} l_k  + \gamma (P^{\pi_{k+1}} - P^{\pi^*}) e_k - \gamma P^{\pi_{k+1}} g_k\\
+            \preceq& \gamma P^{\pi^*} l_k + \gamma \left\{ P^{\pi_{k+1}}{( I - \gamma P^{\pi_{k+1}})}^{-1} (I - \gamma P^{\pi_k}) - P^{\pi^*} \right\} e_k
+        \end{align*}
+        For $ (I - \gamma P^{\pi_k})e_k = b_k $,
+        \[
+            l_{k+1} \preceq \gamma P^{\pi^*}l_k + \gamma \left\{  P^{\pi_{k+1}}{( I - \gamma P^{\pi_{k+1}})}^{-1}  - P^{\pi^*} {(I - \gamma P^{\pi_k})}^{-1}\right\} b_k
+        \]
+    \end{proof}
+\end{lemma}
+\begin{theorem}
+    \[
+        \limsup_{k \rightarrow \infty} \Arrowvert V^* - V^{\pi_k} \Arrowvert_{\mu_0}
+        \le \limsup_{k \rightarrow \infty}\gamma \mu_0 {(I - \gamma P^{\pi^*})}^{-1} \left\{  P^{\pi_{k+1}}{( I - \gamma P^{\pi_{k+1}})}^{-1} + P^{\pi^*} {(I - \gamma P^{\pi_k})}^{-1}\right\} \left| b_k \right|
+    \]
+    \[
+        \limsup_{k \rightarrow \infty} \Arrowvert V^* - V^{\pi_k} \Arrowvert_{\mu_0}
+        \le \limsup_{k \rightarrow \infty}\gamma \mu_0 {(I - \gamma P^{\pi^*})}^{-1} \left\{ P^{\pi_{k+1}}{( I - \gamma P^{\pi_{k+1}})}^{-1} (I + \gamma P^{\pi_k}) + P^{\pi^*} \right\} \left| e_k \right|
+    \]
+    After normalization,let
+    \[
+        Q_k = \frac{{(1 - \gamma)}^2}{2}  {(I - \gamma P^{\pi^*})}^{-1} \left\{  P^{\pi_{k+1}}{( I - \gamma P^{\pi_{k+1}})}^{-1} + P^{\pi^*} {(I - \gamma P^{\pi_k})}^{-1}\right\},
+    \]
+    and
+    \[
+        \tilde Q_k = \frac{{(1 - \gamma)}^{2}}{2} {(I - \gamma P^{\pi^*})}^{-1} \left\{ P^{\pi_{k+1}}{( I - \gamma P^{\pi_{k+1}})}^{-1} (I + \gamma P^{\pi_k}) + P^{\pi^*} \right\}.
+    \]
+    Then, write $ \mu_k = \mu_0 Q_k $ and $ \tilde \mu_k = \mu_0 \tilde Q_k $, we have
+    \[
+        \limsup_{k \rightarrow \infty} \Arrowvert V^* - V^{\pi_k} \Arrowvert_{\mu_0} \le \frac{2\gamma}{{(1 - \gamma)}^{2}}  \limsup_{k \rightarrow \infty} \Arrowvert V_k - T^{\pi_k } V_k \Arrowvert_{\mu_k}
+    \]
+    \[
+        \limsup_{k \rightarrow \infty} \Arrowvert V^* - V^{\pi_k} \Arrowvert_{\mu_0} \le \frac{2 \gamma}{{(1 - \gamma)}^{2}} \limsup_{k \rightarrow \infty} \Arrowvert V_k - V^{\pi_k} \Arrowvert_{\tilde \mu_k}
+    \]
+\end{theorem}
+
+\subsection{APPROXIMATE POLICY EVALUATION}%
+
+\subsubsection{Linear Feature-based approximation}%
+\begin{enumerate}
+    \item Monte-Carlo simulations and regression: $ \min_{\theta} \Arrowvert \Phi \theta - V^{\pi_k}  \Arrowvert^2_{\rho_k} $;
+    \item Minimal quadratic residual solution: $ \min_{\theta} \Arrowvert V_{\theta} - T^{\pi_k} V_{\theta} \Arrowvert^2_{\rho_k} $;
+        \[
+            A \theta = b\ with\ 
+            \begin{cases}
+                A = \Phi^T{(I - \gamma P^{\pi_k})}^{T} D_{\rho_k} (I - \gamma P^{\pi_k})\Phi\\
+                b = \Phi^T{(I - \gamma P^{\pi_k})}^{T} D_{\rho_k} r^{\pi_k}
+            \end{cases}
+        \]
+    \item Temporal Difference solution: $ \min_{\theta} \Arrowvert V_\theta - \Pi_{\pi_k} T^{\pi_k} V_{\theta} \Arrowvert^2_{\rho_k} $. For $ TD(0) $:
+        \[
+            A \theta = b\ with\ 
+            \begin{cases}
+                A = \Phi^T D_{\rho_k} (I - \gamma P^{\pi_k}) \Phi\\
+                b = \Phi^T D_{\rho_k} r^{\pi_k}
+            \end{cases}
+        \]
+\end{enumerate}
+
+Because these method depends on the distribution $ \rho_k $ used in the minimization problem, which usually depends on the policy $ \pi_k $, therefore we have to consider the choice of $ \rho_k $.
+\begin{itemize}
+    \item Steady-state distribution $ \bar\rho_{\pi_k} $: $ \bar\rho_{\pi_k} = \bar\rho_{\pi_k} P^{\pi_k} $;
+    \item Constant distribution $ \rho_0 $;
+    \item  Mixed distribution $ \rho^{\lambda}_{\pi_k} = \rho_0{( I - \lambda P^{\pi_k})}^{-1}(1 - \lambda) $;
+    \item Convex combination mixed distribution: $ \rho^{\delta}_{\pi_k} = (1 - \delta) \rho_0 + \delta \bar \rho_{\pi_k} $.
+\end{itemize}
+\begin{assumption}
+    \[
+        \inf_{\theta} \Arrowvert V_{\theta} - V^{\pi} \Arrowvert_{\rho_{\pi}} \le \epsilon
+    \]
+\end{assumption}
+
+\subsubsection{The Quadratic Residual Soluction}%
+
+\[
+    \Arrowvert V_k - T^{\pi_{k}} V_{k} \Arrowvert_{\rho_k} = \inf_{\theta} \Arrowvert V_{\theta} - T^{\pi_k} V_{\theta} \Arrowvert_{\rho_k} = \inf_{\theta} \Arrowvert (I - \gamma P^{\pi_k})(V_{\theta} - V^{\pi_k}) \Arrowvert_{\rho_k} \le \Arrowvert I - \gamma P^{\pi_k} \Arrowvert_{\rho_k} \epsilon
+\]
+\[
+    \Arrowvert V_k - T^{\pi_k} V_k \Arrowvert^2_{\mu_k} \le {\Arrowvert \mu_k / \rho_k \Arrowvert}_\infty \Arrowvert V_k - T^{\pi_k} V_k \Arrowvert^2_{\rho_k}
+\]
+
+So we need a new assumption.
+\begin{assumption}
+\[
+    \forall \pi, \exists \mu,C, have\ P^{\pi}(i,j) \le C \mu(j).
+\]
+If $ \bar\mu(j) = 1/N $ and $ C = N $, it always satisfies. However, we are actually interested in finding a constant $ C \ll N $.
+\end{assumption}
+
+\begin{lemma}
+    In preceeding section, $ \mu_k = \mu_0 Q_k $. If assumption2 exists, we have $ \mu_k \le C \mu $.
+    \begin{proof}
+        $ (P_1 P_2)(i,j) = \sum^{}_{k} P_1(i,k) P_2(k,j) \le C \mu(j) \sum^{}_{k} P_1(i,k) = C\mu(j) $. So $ Q_k(i,j) \le C \mu(j) \Rightarrow \mu_k(j) \le C\mu(j)$
+    \end{proof}
+\end{lemma}
+\begin{theorem}
+    Assume two assumption hold with some distribution $ \mu_0 $ and $ C $.
+    \begin{itemize}
+        \item $ \rho^{\lambda}_{\pi_k} = \mu_0 {(I - \lambda P^{\pi_k})}^{-1}(1-\lambda) $, then
+            \[
+               \limsup {\Arrowvert V^* - V^{\pi_k} \Arrowvert}_\infty \le \frac{2\gamma}{{(1 - \gamma)}^{2}} \sqrt{\frac{C}{1 - \lambda} } \left( 1 + \gamma\sqrt{\min\left( \frac{C}{1 - \lambda} , \frac{1}{\lambda}  \right)} \right) \epsilon  
+            \]
+        \item $ \rho^{\delta}_{\pi_k} = (1 - \delta) \mu_0 + \delta \bar\rho_{\pi_k} $.
+            \[
+                \limsup {\Arrowvert V^* - V^{\pi_k} \Arrowvert}_\infty \le \frac{2\gamma}{{(1 - \gamma)}^{2}} \sqrt{\frac{C}{1 - \delta} }(1 + \gamma \sqrt C) \epsilon
+            \]
+    \end{itemize}
+    \begin{proof}
+        \begin{enumerate}
+            \item $ \rho^{\lambda}_{k} \succeq (1 - \lambda)\mu_0 $ and $ \rho^{\delta}_{k} \ge (1 - \delta) \mu_0 $.
+            \item $ \Arrowvert P^{\pi_k} \Arrowvert^{2}_{\rho^\lambda_k} \le \min\left( \frac{C}{1 - \lambda}, \frac{1}{\lambda}  \right) $:
+                \[
+                    \Arrowvert P^{\pi_k} h \Arrowvert^2_{\rho^{\lambda}_{k}} = \rho^{\lambda}_{k} {(P^{\pi_k} h)}^{2} \le \rho^{\lambda}_{k} P^{\pi_k}h^2 \le C \mu_0 h^2 \le \frac{C}{1 - \lambda} \rho^{\lambda}_{k}h^2 = \frac{C}{1 - \lambda} \Arrowvert h \Arrowvert^2_{\rho^{\lambda}_{k}}
+                \]
+                \begin{align*}
+                    \Arrowvert P^{\pi_k} h \Arrowvert^2_{\rho^{\lambda}_{k}}
+                    =& (1 - \lambda) \mu_0 \sum^{\infty}_{t=0} \lambda^t {(P^{\pi_k})}^{t} {{P^{\pi_k}h}}^{2}
+                    \le (1 - \lambda) \mu_0 \sum^{\infty}_{t=0} \lambda^{t} {(P^{\pi_k})}^{t+1} h^2\\
+                    =& \frac{1 - \lambda}{\lambda} \mu_0 \left\{ \sum^{\infty}_{t=0} \lambda^t {(P^{\pi_k})}^{t} h^2 - h^2 \right\} \le \frac{1}{\lambda} \rho^{\lambda}_{k}h^2 = \frac{1}{\lambda} \Arrowvert h \Arrowvert^2_{\rho^\lambda_{k}}
+                \end{align*}
+            \item $ \Arrowvert P^{\pi_k} \Arrowvert^2_{\rho^{\delta}_k} \le C $.
+                \begin{align*}
+                    \Arrowvert P^{\pi_k} h \Arrowvert^2_{\rho^{\delta}_k}
+                    =& \rho^{\delta}_{k} {(P^{\pi_k h})}^2
+                    \le (1 - \delta) \mu_0 P^{\pi_k} h^2 + \delta \bar\rho_{\pi_k} P^{\pi_k}h^2
+                    \le C(1 - \delta) \mu_0 h^2 + \delta \bar\rho_k h^2\\
+                    =& C (\rho^{\delta} _ k - \delta \bar \rho_k) h^2 + \delta \bar\rho_k h^2
+                    \le C \rho^{\delta}_{k}h^2
+                \end{align*}
+            \item 
+                \begin{align*}
+                    \limsup_{k \rightarrow\infty} \Arrowvert l_k \Arrowvert_{\mu_0}
+                    \le& \frac{2\gamma}{{(1 - \gamma)}^{2}} \limsup_{k \rightarrow\infty} \sqrt {{\Arrowvert \mu_k / \rho_k \Arrowvert}_\infty} \Arrowvert I - \gamma P^{\pi_k} \Arrowvert_{\rho_{\pi_k}}\epsilon\\
+                    \le&  \frac{2\gamma}{{(1 - \gamma)}^{2}} \limsup_{k \rightarrow\infty} \sqrt {{\Arrowvert \mu_k / \rho_k \Arrowvert}_\infty} \left( 1 + \gamma \Arrowvert P^{\pi} \Arrowvert_{\rho_{\pi_k}} \right)\epsilon\\
+                \end{align*}
+        \end{enumerate}
+    \end{proof}
+\end{theorem} 
+\subsubsection{Temporal Difference Solution}%
+\begin{enumerate}
+    \item 
+        \begin{align*}
+            &(I - \gamma \Pi_{\pi_k} P^{\pi_k}) (V_k - V^{\pi_k}) = V_k - \gamma \Pi_{\pi_k}P^{\pi_k}V_k - V^{\pi_k} + \gamma\Pi_{\pi_k}P^{\pi_k} V^{\pi_k} \\
+            =& - V^{\pi_k} + \Pi_{\pi_k}(r^{\pi_k} + \gamma P^{\pi_k} V^{\pi_k}) = \Pi_{\pi_k}V^{\pi_k} - V^{\pi_k}
+            := \epsilon'_k
+        \end{align*}
+\end{enumerate}
+I lose my patience again.
+
+\section{Finite-Time Bounds for Fitted Value Iteration}%
+
+\subsection{Approximating the Bellman Operator}%
+
+\begin{enumerate}
+    \item Monte-Carlo estimate of $ TV_k $:
+        \[
+             \hat V(s) = \max_{a \in A} \frac{1}{M} \sum^{M}_{j=1} \left[ R_j(s, a) + \gamma V_k(s'_j) \right], s = 1, 2, \ldots, N
+        \]
+        \[
+            V_{k+1} = \arg\min_{f \in \mathcal{F}} \Arrowvert f - \hat V \Arrowvert_p
+        \]
+    \item 
+        \begin{align*}
+            \mathbb{E}\left[ \hat V(s) \right] =& \mathbb{E}\left[ \max_{a \in A} \frac{1}{M} \sum^{M}_{j=1} \left[ R_j(s, a) + \gamma V_k(s'_j) \right] \right] \\
+            \ge& \max_{a \in A} \mathbb{E} \left[ \frac{1}{M} \sum^{M}_{j=1} \left[ R_j(s,a) + \gamma V_k(s'_j) \right] \right] = TV_k
+        \end{align*}
+    \item Bound $ \mathbb{P} \left\{ {\Arrowvert \hat V - T^{\pi_k}V_k \Arrowvert}_\infty \ge \epsilon\right\} \le \delta $
+        \begin{proof}
+            \begin{align*}
+                \mathbb{P} \left\{ {\Arrowvert V^{\pi_k} - T^{\pi_k}V_k \Arrowvert}_\infty \ge \epsilon \right\}
+                \le 2 e^{-\frac{2M \epsilon^2}{{(R_{\max} + \gamma V_{\max})}^2} }
+            \end{align*}
+            It's easy to find function $ M \ge C_M(\epsilon, \delta) $, which guarantees
+            \[
+                 \mathbb{P} \left\{ {\Arrowvert V^{\pi_k} - T^{\pi_k}V_k \Arrowvert}_\infty \ge \epsilon \right\} \le \delta
+            \]
+        \end{proof}
+\end{enumerate}
+
 
 \section{Regularized Modified Policy Iteration}%
-
-
+Wait
 
 \end{document}

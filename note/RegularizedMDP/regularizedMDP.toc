@@ -1,3 +1,11 @@
 \contentsline {section}{\numberline {1}Regularized MDPs}{2}
 \contentsline {section}{\numberline {2}Negative entropy}{4}
-\contentsline {section}{\numberline {3}Regularized Modified Policy Iteration}{4}
+\contentsline {section}{\numberline {3}Error Bounds for Approximate Policy Iteration}{4}
+\contentsline {subsection}{\numberline {3.1}KEY BOUND THEOREM}{4}
+\contentsline {subsection}{\numberline {3.2}APPROXIMATE POLICY EVALUATION}{6}
+\contentsline {subsubsection}{\numberline {3.2.1}Linear Feature-based approximation}{6}
+\contentsline {subsubsection}{\numberline {3.2.2}The Quadratic Residual Soluction}{6}
+\contentsline {subsubsection}{\numberline {3.2.3}Temporal Difference Solution}{7}
+\contentsline {section}{\numberline {4}Finite-Time Bounds for Fitted Value Iteration}{8}
+\contentsline {subsection}{\numberline {4.1}Approximating the Bellman Operator}{8}
+\contentsline {section}{\numberline {5}Regularized Modified Policy Iteration}{8}
