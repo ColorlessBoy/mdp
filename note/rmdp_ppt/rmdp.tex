@@ -1,0 +1,156 @@
+\documentclass{beamer}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{tcolorbox}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\begin{document}
+
+\begin{frame}
+    \title{A Theory of Regularized Markov Decision Processes}
+    \author{Peng Lingwei}
+    \date{\today}
+    \titlepage.
+\end{frame}
+
+\begin{frame}[t]{Related Works}
+    \begin{itemize}
+        \item Trust Region Policy Optimization: Policy iteration, KL penalty;
+        \item Dynamic Policy Programming: Value iteration, KL penalty;
+        \item Soft Q-learning: Value iteration, Shannon entropy penalty;
+        \item Soft Actor Critic: Policy iteration, KL penalty.
+    \end{itemize}
+
+    They propose a general theory of regularized Markov Decision Processes that generalizes these approaches in two directions: 
+    \begin{itemize}
+        \item Consider a larger class of regularizers; 
+        \item Consider the general modified policy iteration approach, encompassing both policy iteration and value iteration. 
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[t]{Background}
+    \textbf{Unregularized MDPs:}
+    \begin{itemize}
+        \item $ Model: \{\mathcal{S}, \mathcal{A}, \underbrace{\mathcal{R}(s, a), \mathcal{P}(s'|s, a)}_{Markovian}, \gamma\} $;
+        \item Markov Random Policy: $ \pi(\cdot | s) $;
+        \item Criterion: $ V^{\pi}(s) = \mathbb{E}_{a \sim \pi(\cdot | s)} \left\{ \sum^{\infty}_{t=0} \gamma^t R(s_t,a_t) | s_0 = s \right\} $, Optimal value $ V^* = \max_{\pi} V^{\pi} $;
+        \item Bellman Operation: $ (T_{\pi}V)(s) = \mathbb{E}_{a \sim \pi(\cdot|s)}\left\{ R(s,a) + \gamma \mathbb{E}_{P(s' | s, a)}V \right\} $;
+        \item Q value: $ Q(s,a) = R(s,a) + \gamma \mathbb{E}_{P(s'|s,a)} V(s) $;
+        \item $ T_{\pi}V = \langle \pi(s), Q(s, \cdot) \rangle $;
+        \item Bellman Optimality Operation: $ TV = \max_{\pi} T_{\pi}V $;
+        \item Greedy Policy: $ \pi' \in G(V) = \arg\max_{\pi}T_{\pi}V $.
+    \end{itemize}
+    \textbf{Legendre-Fenchel transform:}
+    Let $ \Omega: \Delta_A \rightarrow \mathbb{R} $ be a strongly convex function:
+    \[
+        \forall Q_s \in \mathbb{R}^{A}, \Omega^{*}(Q_s) = \max_{\pi_s \in \Delta_A} \langle \pi_s, Q_s \rangle - \Omega(\pi_s)
+    \]
+\end{frame}
+
+\begin{frame}[t]{Regularized MDPs}
+    \begin{itemize}
+        \item $ Model: \{\mathcal{S}, \mathcal{A}, \underbrace{\mathcal{R}(s, a), \mathcal{P}(s'|s, a)}_{Markovian}, \gamma, \Omega\} $;
+        \item Markov Random Policy: $ \pi(\cdot | s) $;
+        \item Criterion: $ V^{\pi, \Omega}(s) = \mathbb{E}_{a \sim \pi(\cdot | s)} \left\{ \sum^{\infty}_{t=0} \gamma^t R(s_t,a_t) | s_0 = s \right\} - \Omega(\pi) $;
+            \begin{align*}
+                V^{\pi, \Omega}(s) =& \mathbb{E}^{\pi}\left[ \sum^{\infty}_{t=0} \gamma^t (r(S_t, A_t) - (1-\gamma)\Omega(\pi(s))) \vert S_0 = s \right] \\
+               =& \mathbb{E}^{\pi}\left[ \sum^{\infty}_{t=0} \gamma^t (r(S_t, A_t)) \vert S_0 = s \right] - \sum^{\infty}_{t=0} (1-\gamma) \gamma^t \Omega(\pi(s)) \\ 
+              =& V^{\pi}(s) - \Omega(\pi(s))
+            \end{align*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[t]{Regularized MDPs}
+    \begin{itemize}
+        \item $ Q^{\pi, \Omega}(s,a) = r(s,a) + \gamma \mathbb{E}_{P(s'|s,a)}\left[ V^{\pi, \Omega}(s') \right] $,
+            \[
+                V^{\pi, \Omega}(s) = \langle \pi(s), Q^{\pi, \Omega}(s, \cdot) \rangle - (1-\gamma)\Omega(\pi(s)) 
+            \]
+        \item Optimal value:
+            \begin{align*}
+                V^{*, \Omega}(s) =& \max_{\pi \in \Pi^{MR}} V^{\pi}(s) - \Omega(\pi(s))\\
+                =& \max_{\pi \in \Pi^{MR}} \langle \pi(s), Q^{\pi, \Omega}(s, \cdot) \rangle- (1 - \gamma)\Omega(\pi(s))\\
+                =& \max_{\pi \in \Pi^{MR}} \langle \pi(s), Q^{*, \Omega}(s, \cdot) \rangle- (1 - \gamma)\Omega(\pi(s)) \quad \\ 
+                =& \Omega^{*}_{\gamma}(Q^{*,\Omega}(s,\cdot))
+            \end{align*}
+            \[
+                \forall q_s \in \mathbb{R}^{\left| A \right|}, \Omega_{\gamma}^{*}(q_s)
+                = \max_{\pi \in \Pi^{MR}} \langle \pi_s, q_s \rangle - (1- \gamma) \Omega(\pi_s)
+            \]
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[t]{Regularized Bellman Operation}
+    Regularized Bellman operation: $ T^{\pi,\Omega}V = T^{\pi} V - (1-\gamma)\Omega(\pi)$\\
+        \begin{itemize}
+            \item Let $ Q_V(s,a) = r(s,a) + \gamma \mathbb{E}_{P(s'|s,a)}\left[ V(s') \right] $,
+                \[
+                    T^{\pi,\Omega}V (s) = \langle \pi_s, Q_V(s, \cdot) \rangle - (1 - \gamma)\Omega(\pi_s)
+                \]
+            \item Monotonicity:$ V_1 \succeq V_2 \Rightarrow T^{\pi, \Omega}V_1 \succeq T^{\pi, \Omega}V_2 $
+            \item Distributivity: $ T^{\pi, \Omega}(V + c \vec{1}) =  T^{\pi, \Omega}(V) + \gamma c \vec{1} $
+            \item Contraction: $ \Arrowvert T^{\pi, \Omega}V_1 - T^{\pi, \Omega}V_2 \Arrowvert_{\infty} \le \gamma {\Arrowvert V_1 - V_2 \Arrowvert}_\infty $
+            \item $ T^{\pi,\Omega} $'s unique fixed point is $ V^{\pi, \Omega} $;
+                \begin{align*}
+                    T^{\pi, \Omega}V^{\pi, \Omega} =& T^{\pi}V^{\pi, \Omega} - (1 - \gamma) \Omega(\pi)\\
+                    =& T^{\pi}\left( V^{\pi} - \Omega(\pi) \right) - (1 - \gamma) \Omega(\pi)\\
+                    =& T^{\pi}(V^{\pi}) - \gamma \Omega(\pi) - (1-\gamma) \Omega(\pi)\\
+                    =& V^{\pi} - \Omega(\pi) = V^{\pi, \Omega}
+                \end{align*}
+        \end{itemize}
+\end{frame}
+
+\begin{frame}[t]{Regularized Bellman Optimality Operation}
+        \begin{align*}
+            T^{*,\Omega}V =& \max_{\pi \in \Pi^{MR}} T^{\pi,\Omega}V\\
+            =& \max_{\pi \in \Pi^{MR}} \langle \pi_s, Q_V(s, \cdot) \rangle - (1 - \lambda)\Omega(\pi_s)
+            = \Omega^{*}_{\gamma}( Q_{V}(s,\cdot))
+        \end{align*}
+        \begin{itemize}
+            \item Monotonicity: $ V_1 \succeq V_2 \Rightarrow T^{*,\Omega} V_1 \succeq T^{*, \Omega} V_2 $.\\
+            \item Distributivity: $ T^{*,\Omega}(V + c \vec{1}) = T^{*, \Omega}V + \gamma c \vec{1} $.
+            \item Contraction: $ {\Arrowvert T^{*, \Omega}V_1 - T^{*, \Omega}V_2 \Arrowvert}_\infty \preceq \gamma {\Arrowvert V_1 - V_2 \Arrowvert}_\infty $
+            \item $ T^{*, \Omega} $'s unique fixed point is $ V^{*,\Omega} $. (We talk about $ \sup $ instead of $ \min $)\\
+                \[
+                    V^{*,\Omega} = T^{*, \Omega} V^{*, \Omega}.
+                \]
+        \end{itemize}
+        Assume that $ \Omega_L \le \Omega \le \Omega_U $, then $ V^{\pi} - \Omega_U \le V^{\pi, \Omega} \le V^{\pi} - \Omega_L $.
+\end{frame}
+
+\begin{frame}[t]{Negative Entropy}
+   A classical example is the negative entropy $ \Omega(\pi_s) = {(1 - \gamma)}^{-1}\sum^{}_{a} \pi_s(a) \ln \pi_s(a) $.
+\begin{align*}
+    \Omega^{*}_{\gamma}(q_s) =& \max_{\pi \in \Pi^{MR}} \langle \pi_s, q_s \rangle - \sum^{}_{a} \pi_s(a) \ln \pi_s(a)
+\end{align*}
+We change it into 
+\begin{align*}
+    -\Omega^{*}_{\gamma}(q_s) =& \min_{\pi_{s} \succeq \vec{0}} \max_{\alpha \ne 0} \alpha \left(\sum^{}_{a} \pi_s(a) - 1 \right)-\langle \pi_s, q_s \rangle + \sum^{}_{a} \pi_s(a) \ln \pi_s(a)\\
+    \Rightarrow& \pi_s(a) = \frac{\exp \left\{q_{s}(a) \right\}}{\sum^{}_{a} \exp\left\{ q_s(a) \right\}} 
+\end{align*}
+\[
+    \Omega^{*}_{\gamma}(q_s) = \ln \sum^{}_{a} \exp q_s(a) \Rightarrow \nabla \Omega^*_{\gamma}(q_s) = \frac{\exp\left\{ q_s(a) \right\}}{ \sum^{}_{a} \exp\left\{ q_s(a) \right\}} = \pi^*_s(a)
+\]
+\end{frame}
+
+\begin{frame}[t]{From Dynamic Programming to RMPI}
+    \begin{enumerate}
+        \item Value Iteration: $ \pi_{t+1} = \arg\max_{\pi} T_{\pi} V_{t}, V_{t+1} = T_{\pi_{t+1}} V_t; \quad (V_{t+1} = T V_t) $
+        \item Policy Iteration: $  \pi_{t+1} = \arg\max_{\pi} T_{\pi} V_{t}, V_{t+1} = V^{\pi_{t}} = T^{\infty}_{\pi_{t+1}} V_{t}$;
+        \item Modified Policy Iteration: $ \pi_{t+1} = \arg\max_{\pi} T_{\pi} V_t, V_{t+1} = T^{m}_{\pi_{t+1}} V_t $.
+    \end{enumerate}
+    \textbf{Regularized Modified Policy Iteration:}
+    \[
+        \begin{cases}
+            \pi_{k+1} = \arg\max_{\pi} T_{\pi, \Omega} V_t,\\
+            V_{k+1} = T^{m}_{\pi_{k+1}, \Omega} V_k
+        \end{cases}
+    \]
+    
+\end{frame}
+
+\end{document}

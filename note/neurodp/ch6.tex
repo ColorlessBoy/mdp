@@ -1,0 +1,661 @@
+% Chapter6 Approximate DP with Cost-to-Go Function Approximation, Neuro Dynamic Programming.
+
+\section{Approximate DP with Cost-to-Go Function Approximation}%
+\label{sec:approximate_dp_with_cost_to_go_function_approximation}
+
+\subsection{GENERIC ISSUES-FROM PARAMETERS TO POLICIES}%
+\label{sub:generic_issues_from_parameters_to_policies}
+
+Most of the methods discussed in this chapter lead to an approximate cost-to-go function $ \tilde J_{w}(s) $, which is meant to be a good approximation of the optimal cost-to-go function $ J^*(s) $.
+Such $ \tilde J_w(s) $ leads to a corresponding greedy policy $ \tilde\pi $ defined by
+\[
+    \tilde\pi(s) = \arg\min_{a \in A_s} \sum^{}_{s'} p_{ss'}(a)(g(s, a, s') + \tilde J_{w}(s'))
+\]
+(Here is an undiscounted problem. Critic period.)
+
+\textbf{(Approximation of Q-Factors)}
+We approximate $ \hat Q_{w_2} $:
+\[
+    \tilde Q_{w_1}(s, a) = \sum^{}_{s'} p_{ss'}(a) (g(s, a, s') + \tilde J_{w_1}(s'))
+\]
+\[
+    \min_{w_2} \sum^{}_{(s, a)} {(\hat Q_{w_2}(s, a) - \tilde Q_{w_1}(s,a))}^2
+\]
+
+\textbf{(Policy Approximation)}
+\[
+    \min_{w_3} \sum^{}_{s \in \hat S} \Arrowvert \hat \pi_{w_3}(s) - \tilde \pi(s) \Arrowvert^2
+\]
+(Actor period.)
+
+\subsubsection{Generic Error Bounds}%
+
+Approximate DP is based on the hypothesis that:
+If $ \tilde J_{w} $ is a good approximation of $ J^* $, then the greedy policy based on $ \tilde J_{w} $ is close to optimal.
+
+\begin{theorem}
+    Consider a discounted problem, with discount factor $ 0 \le \gamma < 1$,
+    \[
+        {\Arrowvert \tilde J_{w} - J^* \Arrowvert}_\infty \le \epsilon \Rightarrow
+        {\Arrowvert J^{\tilde \pi} - J^* \Arrowvert}_\infty \le \frac{2 \gamma \epsilon}{1 - \gamma} 
+    \]
+    which means that $ \tilde \pi $ can be arbitrary $ \frac{2\gamma \epsilon}{1 - \gamma} $-optimal policy.
+    \begin{proof}
+        \begin{align*}
+            {\Arrowvert J^{\tilde \pi} - J^* \Arrowvert}_\infty
+            =& {\Arrowvert T^{\tilde \pi} J ^{\tilde \pi} - J^{*} \Arrowvert}_\infty\\
+            \le& {\Arrowvert T^{\tilde \pi} J^{\tilde \pi} - T^{\tilde \pi} \tilde J_{w} \Arrowvert}_\infty
+            + {\Arrowvert T \tilde J_{w} - T J^{*} \Arrowvert}_\infty\\
+            \le& \gamma {\Arrowvert J^{\tilde \pi} - \tilde J_{w} \Arrowvert}_\infty + \gamma {\Arrowvert \tilde J_{w} - J^{*} \Arrowvert}_\infty\\
+            \le& \gamma {\Arrowvert J^{\tilde \pi} - J^* \Arrowvert}_\infty + 2 \gamma {\Arrowvert \tilde J_{w} - J^* \Arrowvert}_\infty
+        \end{align*}
+    \end{proof}
+\end{theorem}
+
+\subsubsection{Multistage Lookahead Variations}%
+
+\subsubsection{Rollout Policies}%
+
+\subsubsection{Trading off Control Space Complexity with State Space Complexity}%
+
+\subsection{APPROXIMATE POLICY ITERATION}%
+
+\begin{itemize}
+    \item Approximate policy evaluation;
+    \item Policy update.
+\end{itemize}
+
+\subsubsection{Approximate Policy Iteration Based on Monte Carlo Simulation}%
+
+A variant of approximate policy iteration that combines Monte Carlo simulation and approximation for the purpose of policy evaluation.
+
+First, we sample M trajectories, and minimize $ w $ as supervised learning.
+
+\[
+    \min_{w} \sum^{}_{s \in S} \sum^{M(s)}_{m = 1} {(\tilde J_w(s) - c(s, m))}^2
+\]
+
+Then we get statistical approximation $ \tilde Q_{w}(s, a) = \sum^{}_{s'} p_{ss'}(a) \left( g(s, a, s') + \tilde J_{w}(s') \right) $, and get greedy policy $ \tilde \pi $.
+
+\subsubsection{Error Bounds for Approximate Policy Iteration}%
+
+We assume that all policy evaluations and all policy updates are performed with a certain error tolerance of $ \epsilon $ and $ \delta $.
+
+\[
+    {\Arrowvert \tilde J_{w_k} - J^{\pi_k} \Arrowvert}_\infty \le \epsilon
+\]
+\[
+    {\Arrowvert T^{\pi_{k+1}} \tilde J_{w_k} - T \tilde J_{w_k} \Arrowvert}_\infty \le \delta
+\]
+
+\subsubsection*{Discounted Problems}%
+\begin{lemma}
+    If $ {\Arrowvert J - J^{\pi} \Arrowvert}_\infty \le \epsilon $, and $  T^{\bar \pi} J - TJ \preceq \delta \cdot \vec{1}$, then
+    \[
+         J^{\bar\pi} - J^{\pi} \preceq \frac{\delta + 2\gamma \epsilon}{1 - \gamma} \cdot \vec{1}
+    \]
+    \begin{proof}
+        Let $ \xi = \max_{s \in S} J^{\bar\pi}(s) - J^{\pi}(s) $.
+        \begin{align*}
+            J^{\bar\pi} - J^{\pi} =& J^{\bar\pi} - T^{\bar\pi} J^{\pi} + T^{\bar\pi}J^{\pi} - T^{\bar\pi}J + T^{\bar\pi}J - T^{\pi}J + T^{\pi}J - J^{\pi}\\
+            \preceq& \gamma \xi\cdot \vec{1} + \gamma\epsilon \cdot \vec{1} + T^{\bar\pi}J - T^{\pi}J + \gamma\epsilon \cdot \vec{1}\\
+            (1 - \gamma) \xi \preceq& 2\gamma\epsilon\cdot \vec{1} + T^{\bar\pi}J - TJ
+            \preceq (2\gamma\epsilon + \delta)\cdot \vec{1}
+        \end{align*}
+    \end{proof}
+\end{lemma}
+
+Then we have $ J^{\pi_{k+1}} - J^{\pi_{k}} \preceq \frac{\delta + 2\gamma\epsilon}{1 - \gamma}\cdot \vec{1} $.\\
+
+\begin{lemma}
+Let $ \sigma_k = \max_{s \in S}\left( J^{\pi_k}(s) - J^{*}(s) \right) $
+\[
+    \sigma_{k+1} \le \gamma\sigma_k + \gamma\xi_k + \delta+2\gamma\epsilon
+\]
+\begin{proof}
+\begin{align*}
+    J^{\pi_{k+1}} - J^{*} =& (J^{\pi_{k+1}} - T^{\pi_{k+1}}J^{\pi_k}) + (T^{\pi_{k+1}}J^{\pi_k} - T^{\pi_{k+1}}\tilde J_{w_k}) \\
+    &+ (T^{\pi_{k+1}} \tilde J_{w_k} - T \tilde J_{w_k}) +  (T \tilde J_{w_k}- T J^{\pi_k}) + (TJ^{\pi_k} - J^{*})\\
+    \preceq& (\gamma \xi_k + \gamma\epsilon + \delta + \gamma\epsilon + \gamma \sigma_k) \cdot \vec{1}
+    = (\gamma \sigma_k + \gamma\xi_k + \delta + 2\gamma\epsilon) \cdot \vec{1}
+\end{align*}
+\end{proof}
+\end{lemma}
+
+\begin{theorem}
+    \[
+        \limsup_{k \rightarrow \infty} {\Arrowvert J^{\pi_k} - J^{*} \Arrowvert}_\infty \le \frac{\delta + 2\gamma\epsilon}{{(1 - \gamma)}^2} 
+    \]
+    \begin{proof}
+        \begin{align*}
+            (1 - \gamma) \limsup_{k \rightarrow \infty} \sigma_k \le \gamma \frac{\delta + 2\gamma\epsilon}{1 - \gamma} + \delta + 2\gamma\epsilon = \frac{\delta + 2\gamma\epsilon}{1 - \gamma} 
+        \end{align*}
+    \end{proof}
+\end{theorem}
+
+\subsubsection*{Stochastic Shortest Path Problems}%
+
+In this problem (undiscounted), the policy can be proper of improper. If $ \pi_k $ is improper, $ J^{\pi_k} $ has infinity part and the preceeding algorithm breaks down.
+
+\[
+    S = \left\{ 0, 1, 2, \ldots \right\}
+\]
+
+\begin{theorem}
+    Let $ \rho = \max_{i = 1, 2, \ldots, n; \pi: proper} P^{\pi}(s_n \ne 0 | s_0 = i) $. Assume that the preceeding algorithm generates proper policies. Then
+    \[
+        \limsup_{k \rightarrow \infty} {\Arrowvert J^{\pi_k} - J^* \Arrowvert}_\infty \le \frac{n(1 - \rho + n)(\delta + 2\epsilon)}{{(1 - \rho)}^2} 
+    \]
+    \begin{proof}
+        \begin{align*}
+            J^{\pi_{k+1}} - J^{\pi_{k}} =&
+            (T^{\pi_{k+1}} J^{\pi_{k+1}} - T^{\pi_{k+1}}J^{\pi_k})
+            + (T^{\pi_{k+1}} J^{\pi_k}- T^{\pi_{k+1}}\tilde J^{w_{k}})\\
+            &+ (T^{\pi_{k+1}} \tilde J^{w_{k}} - T \tilde J_{w_k})
+            + (T \tilde J_{w_k} - TJ^{\pi_k}) + (TJ^{\pi_k} - T^{\pi_k} J^{\pi_k})\\
+            \preceq& P^{\pi_{k+1}} (J^{\pi_{k+1}} - J^{\pi_k}) + (\epsilon + \delta + \epsilon) \cdot \vec{1}
+        \end{align*}
+    \end{proof}
+    \begin{lemma}
+        \begin{enumerate}
+            \item $ x \preceq Px + c\vec{1} \Rightarrow x \preceq \frac{nc}{1 - \rho} \cdot \vec{1} $ 
+            \item $ x_{k+1} \preceq P x_{k} + c \vec{1} \Rightarrow \limsup_{k \rightarrow \infty} x_k \preceq \frac{nc}{1 - \rho} \cdot \vec{1} $ 
+        \end{enumerate}
+        \begin{proof}
+            Let $ y(i) = \max\left\{ 0, x(i) \right\}, i = 1, \ldots, n $.
+            \[
+                x \preceq Px + c\vec{1} \preceq Py + c \vec{1}
+                \Rightarrow \max\left\{ 0, x \right\} \preceq \max\left\{ 0, Py + c\vec{1} \right\} = Py + c \vec{1}
+            \]
+            \[
+                y \preceq P^n y + nc\vec{1} \preceq \rho \left( \max y \right) \cdot \vec{1} + nc \vec{1}
+            \]
+            \[
+                x \preceq \max y \cdot \vec{1} \preceq \frac{nc}{1 - \rho} 
+            \]
+            Similarly, we obtain $ \max y_{k+n} \le \rho \max y_k + nc $. Hence,
+            \[
+                \limsup_{k \rightarrow \infty} \left( \max y_{k+n} \right) \le \rho \limsup_{k \rightarrow \infty} \left( \max y_k \right) + nc
+            \]
+        \end{proof}
+    \end{lemma}
+    From preceeding lemma, we can get $ J^{\pi_{k+1}} - J^{\pi_{k}} \preceq \frac{n(\delta + 2\epsilon)}{1 - \rho}  $.
+    \begin{align*}
+        J^{\pi_{k+1}} - J^{*} =& (J^{\pi_{k+1}} - T^{\pi_{k+1}} J^{\pi_k}) + (T^{\pi_{k+1}}J^{\pi_k} - T^{\pi^*} J^{\pi_k}) + (T^{\pi^*}J^{\pi_k} - T^{\pi^*}J^{*})\\
+        \preceq& P^{\pi_{k+1}} (J^{\pi_{k+1}} - J^{\pi_k}) + \left( T^{\pi_{k+1}} J^{\pi_k} - T^{\pi_k} J^{\pi_k} \right) + P^{\pi^*}\left( J^{\pi_k} - J^* \right)\\
+        \preceq& P^{\pi^*}\left( J^{\pi_k} - J^* \right) + \frac{n(\delta+2\epsilon)}{1 - \rho} \cdot \vec{1} + (\delta + 2\epsilon)\cdot \vec{1} \\
+        =& P^{\pi^*}\left( J^{\pi_k} - J^* \right) + \frac{(1 - \rho + n)(\delta + 2\epsilon)}{1 - \rho} \cdot \vec{1}
+    \end{align*}
+    \[
+        \limsup_{k \rightarrow \infty} {\Arrowvert J^{\pi_{k+1}} - J^{*}\Arrowvert}_\infty \le \frac{n(1 - \rho + n)(\delta + 2\epsilon)}{{(1 - \rho)}^2} 
+    \]
+\end{theorem}
+
+The preceeding theorem uses the stochastic shortest path problems's property, which shows that the probability of termination at state 0 after n transformation is positive. We can get better estimate.
+\[
+    \rho_m = \max_{i = 1, \ldots, n; \pi:proper} P^{\pi}\left( s_m \ne 0 | s_0 = i \right)
+\]
+Then
+\[
+        \limsup_{k \rightarrow \infty} {\Arrowvert J^{\pi_{k+1}} - J^{*}\Arrowvert}_\infty \le \frac{m(1 - \rho_{m} + m)(\delta + 2\epsilon)}{{(1 - \rho_{m})}^2} 
+\]
+
+If we can guarantee termination occurs within at most N stages for all proper policies, then $ \rho_N = 0 $, and we obtain
+\[
+    \limsup_{k \rightarrow \infty} {\Arrowvert J^{\pi_{k+1}} - J^{*}\Arrowvert}_\infty \le N(1 + N) (\delta + 2\epsilon)
+\]
+If policies converge, we can obtain
+\[
+    k \rightarrow \infty, \quad J^{\pi_{k+1}} - J^{*} \preceq P^{\pi^*} (J^{\pi_k} - J^*) + (\delta + 2\epsilon) \cdot \vec{1}
+\]
+\[
+    \limsup_{k \rightarrow \infty} {\Arrowvert J^{\pi_{k+1}} - J^{*}\Arrowvert}_\infty \le \frac{n(\delta + 2\epsilon)}{1 - \rho} 
+\]
+
+\subsubsection{Tightness of the Error Bounds and Empirical Behavior}%
+
+Here is an example showing that the bound is tight.
+
+\begin{example}
+    Environment is discounted MDP:\\
+    \begin{enumerate}
+        \item $ S = \left\{ 1, 2, \ldots, n \right\} $;
+        \item $ A_1 = \left\{ stay \right\}$, and $ A_i = \left\{ stay, \text{goto } s_{i-1} \right\} $;
+        \item $ r(s = 1, a = stay) = 0 $, $ r(s = i, a = stay) = r(s = i-1, a = stay) + \delta + 2\gamma \epsilon $, otherwise r = 0.
+    \end{enumerate}
+    \begin{proof}
+        Here are two cases.
+        \begin{enumerate}
+            \item Case 1: $ \pi_k = \left\{ a_1 = stay, a_i = \text{goto }s_{i-1} | i \ge 2 \right\} $. Then, $ J^{\pi_k} = \left\{ 0, 0, \ldots, 0 \right\} $. And we let $ \tilde J_{w_k} = \left\{ \epsilon, -\epsilon, 0, \ldots, 0 \right\} $.\\
+                If $ \pi_{k+1} = \left\{ a_1 = stay, a_2 = stay, a_i = \text{goto }s_{i-1} | i > 2 \right\} $,
+                \[
+                    T^{\pi_{k+1}}\tilde J_{w_k} = \left\{ \epsilon\lambda, \delta + \epsilon\lambda, -\epsilon\lambda, \ldots, -\epsilon\lambda^{n-2} \right\}
+                \]
+                \[
+                    T \tilde J_{w_k} = \left\{ \lambda\epsilon, \lambda\epsilon, -\epsilon\lambda, \ldots, \epsilon\lambda^{n-2} \right\} \Rightarrow {\Arrowvert T^{\pi_{k+1}}\tilde J_{w_k} - T\tilde J_{w_k} \Arrowvert}_\infty \le \delta
+                \]
+                which satisfies the error condition.
+            \item Case 2: $ \pi_{k} = \left\{ a_1 = stay, a_j = stay, a_{otherwise} = \text{goto preceeding state} \right\} $
+                \[
+                    J^{\pi_k} = \left\{ 0, 0,\ldots, \frac{g_j}{1 - \gamma}, \frac{\gamma g_j}{1 - \gamma}, \ldots, \frac{\gamma^{n-j}g_j}{1 - \gamma} \right\}
+                \]
+                \[
+                    \tilde J_{w_k} = \left\{ 0, 0,\ldots, \epsilon + \frac{g_j}{1 - \gamma}, -\epsilon + \frac{\gamma g_j}{1 - \gamma}, \ldots, \frac{\gamma^{n-j}g_j}{1 - \gamma} \right\}
+                \]
+                Let $ \pi_{k+1} = \left\{ a_1 = stay, a_{j+1} = stay, a_{otherwise} = \text{goto preceeding state} \right\} $
+                \[
+                    T^{\pi_{k+1}} \tilde J_{w_k} = \left\{ 0, 0, \ldots, 0, g_{j+1} - \gamma\epsilon + \frac{\gamma^2 g_j}{1 - \gamma}, \left( -\epsilon + \frac{\gamma g_j}{1 - \gamma} \right)\gamma, \ldots, \left( -\epsilon + \frac{\gamma g_j}{1 - \gamma}  \right)\gamma^{n - j - 1} \right\}
+                \]
+                \[
+                    T \tilde J_{w_k} = \left\{ 0, 0, \ldots, 0, T_{j+1}, \left( -\epsilon + \frac{\gamma g_j}{1 - \gamma} \right)\gamma, \ldots, \left( -\epsilon + \frac{\gamma g_j}{1 - \gamma}  \right)\gamma^{n - j - 1} \right\}
+                \]
+                where $ T_{j+1} = \min\left\{ g_{j+1} - \gamma\epsilon + \frac{\gamma^2 g_j}{1 - \gamma}, \gamma \epsilon + \frac{\gamma^2 g_k}{1 - \gamma}   \right\} $
+                \[
+                    {\Arrowvert T^{\pi_{k+1}}\tilde J_{w_k} - T\tilde J_{w_k} \Arrowvert}_\infty \le
+                    \left| g_{j+1} - \gamma\epsilon + \frac{\gamma^2 g_j}{1 - \gamma} - \gamma \epsilon - \frac{\gamma^2 g_k}{1 - \gamma} \right| = \delta
+                \]
+                which satisfies the error condition.
+            \item If $ \pi_k = \left\{ a_1 = stay, a_n = stay, a_{otherwise} = \text{goto preceeding state} \right\} $,
+                \[
+                   J^{\pi_k} = \left\{ 0, 0, \ldots, \frac{g_n}{1 - \gamma} \right\}   
+                \]
+                For $ n \rightarrow \infty, g_n \rightarrow \frac{\delta + 2 \lambda \epsilon}{1 - \lambda} $,
+                \[
+                    {\Arrowvert J^{\pi_k} - J^{*} \Arrowvert}_\infty = \frac{\delta + 2\lambda\epsilon}{{(1 - \lambda)}^2} 
+                \]
+                \item Overall, the algorithm will go into oscillatory pattern.
+        \end{enumerate}
+    \end{proof}
+\end{example}
+
+\textbf{Doubt}:
+The same example can be also viewed as a stochastic shortest path problem, by interpreting $ 1 - \gamma $ as a termination probability, we have $ m = 1 $ and $ \rho_m = \gamma $. We thus conclude that the bound in stochastic shortest path problem is also tight, within a small constant factor.
+
+\subsection{APPROXIMATION POLICY EVALUATION USING USING TD$ (\lambda) $}%
+\begin{itemize}
+    \item If the cost-to-go have large variance, $ TD(\lambda) $ converges faster and leads to better performance than that obtained from $ TD(1) $;
+    \item $ TD(\lambda) $ may converge to a different limit for different values of $ \lambda $;
+    \item Approximation $ TD(\lambda) $ convergence's issue is much more complex. 
+\end{itemize}
+
+\subsubsection{Approximate Policy Evaluation Using $ TD(1) $}%
+
+We consider a stochastic shrotest path problem, with 0 being a cost-free absorbing state, and we assume that $ \mu $ is a proper policy. And we use $ \tilde J_{w}(s) $ to approximate $ J^{\pi}(s) $, and fixed $ J(0) = \tilde J_{w}(0) = 0 $.
+
+For $ m $th trajectory $ (s^m_0, s^m_1, \ldots, s^m_N) $, we update $ w $ by Monte Carlo method.
+\[
+    w_{m+1} = \arg\min_{w} \frac{1}{2} \sum^{N-1}_{t=0} {\left( \tilde J_{w_m}(s^m_t) - \sum^{N-1}_{k=t} g(s^m_k, \pi(s^m_k), s^m_{k+1}) \right)}^2
+\]
+\[
+    w_{m+1} = w_m - \alpha\sum^{N-1}_{t=0} \nabla_{w} \tilde J_{w_m}(s^m_t) \left( \tilde J_{w_m}(s^m_t) - \sum^{N-1}_{k=t} g(s^m_k, \pi(s^m_k), s^m_{k+1})  \right)
+\]
+Let $ d^m_k = g(s^m_k,s^m_{k+1}) + \tilde J_{w_m}(s^m_{k+1}) - \tilde J_{w_m}(s^m_k) $, thus
+\begin{align*}
+    w_{m+1} =& w_m + \alpha \sum^{N-1}_{t=0} \nabla_{w} \tilde J_{w_m}(s^m_t) \sum^{N-1}_{k=t} d^m_k\\
+    =& w_m + \alpha \sum^{N-1}_{k=0} d^m_{k} \sum^{k}_{t = 0} \nabla_{w} \tilde J_{w_m}(s^m_t)\\
+    =& w_m + \alpha \sum^{N-1}_{t = 0} d^m_{t} \sum^{t}_{k=0} \nabla_w \tilde J_{w_m}(s^{m}_k)
+\end{align*}
+
+\begin{itemize}
+    \item Off-line: all updates of the vector w are performed at the end of a trajectory;
+    \item On-line: an update is performed subsequent to each transition.
+        \[
+            w^m_{t+1} = w^m_{t} + \alpha d^m_t \sum^{t}_{k=0} \nabla_w \tilde J_{w^m_t}(s^m_k)
+            \quad {s.t.}\quad w^m_{0} = w_m \wedge w^m_{N} = w_{m+1}
+        \]
+        
+\end{itemize}
+In linear approximation and first-visit method, off-line and on-line are same.
+The difference between the two variants is of second order in the stepsize $ \alpha $ and is therefore inconsequenctial as the stepsize diminishes to zero.
+
+\subsubsection{$ TD(\lambda) $ for General $ \lambda $}%
+
+\begin{align*}
+    w_{m+1} =& w_m + \alpha \sum^{N-1}_{t = 0} \nabla_{w} \tilde J_{w_m}(s^m_t) \sum^{N-1}_{k = t} d_k \lambda^{k-t}\\
+    =& w_m + \alpha \sum^{N-1}_{k = 0} d_k \sum^{k}_{t = 0} \nabla_w \tilde J_{w_m} (s^m_{t}) \cdot \lambda^{k-t}\\
+    =& w_m + \alpha \sum^{N-1}_{t = 0} d_t \sum^{t}_{k = 0} \nabla_w \tilde J_{w_m} (s^m_{k}) \cdot \lambda^{t-k}
+\end{align*}
+\[
+    w^{m}_{t+1} = w^{m}_{t} + \alpha d_t \sum^{t}_{k = 0} \lambda^{t-k} \nabla_{w}\tilde J_{w^m_t}(s^m_{k})
+\]
+
+Its convergence behavior is unclear. (?)
+
+We now look deeper in $ TD(0) $. 
+\[
+    w^{m}_{t+1} = w^{m}_{t} + \alpha d_t \nabla_{w} \tilde J_{w^{m}_{t}}(s^m_t)
+\]
+
+$ TD(0) $ can be thought of as a stochastic approximation method for solving the Bellman equations
+\[
+    \forall s \in S, J(s) = \sum^{}_{s' \in S} p^{\pi}_{ss'}(g^{\pi}(s, s') + J(s'))
+\]
+for $ S = \left\{ 0, 1, \ldots, n \right\} $, we are trying to minimize
+\[
+    \sum^{}_{s \in S} {\left( \tilde J_{w}(s) - \sum^{}_{s' \in S} p^{\pi}_{ss'}(g^{\pi}(s, s') + \tilde J_{w}(s')) \right)}^2
+\]
+An incremental gradient update based on the state s,
+\begin{align*}
+    w' =& w + \alpha \left( \nabla_{w} \tilde J_{w}(s) - \sum^{}_{s' \in S} p^{\pi}_{ss'} \nabla_w \tilde J_{w}(s')\right)\left( \tilde J_{w}(s) - \sum^{}_{s' \in S} p^{\pi}_{ss'}(g^{\pi}(s, s') + \tilde J_{w}(s')) \right) \\
+     =& w + \alpha \sum^{}_{s' \in S} p^{\pi}_{ss'} \left( \tilde J_{w}(s) - g^{\pi}(s, s') - \tilde J_{w}(s') \right) \left( \nabla_{w} \tilde J_{w}(s) - \sum^{}_{s' \in S} p^{\pi}_{ss'} \nabla_w \tilde J_{w}(s')\right)\\
+     =& w + \alpha \mathbb{E}_{s' \sim P^{\pi}_{s\cdot}}\left[ d_{w}(s, s') \right]\left( \nabla_{w} \tilde J_{w}(s) - \sum^{}_{s' \in S} p^{\pi}_{ss'} \nabla_w \tilde J_{w}(s')\right)\\
+\end{align*}
+Thus, $ TD(0) $ could be explained as an stochastically incremental gradient algorithm, but the term $ d_{w}(s,s') \sum^{}_{s' \in S} p_{ss'}\nabla_w \tilde J_{w}(s') $ is omitted, because it's not easy to predict.
+
+Here is an example that $ TD(\lambda) $ preforms badly.
+
+\begin{example}
+    \begin{itemize}
+        \item $ s = \left\{ 0, 1, 2, \ldots, n \right\} $;
+        \item There is only one policy $ \pi = (s_0 = stay, a_i = goto\ s_{i-1} | i \ge 2) $;
+        \item So the costs are fixed as $ g_i $;
+        \item We use a poor linear approximation:$ \tilde J_{w}(s) = ws $.
+    \end{itemize}
+
+    Then we have $ d^m_t = g_{s^m_t} + \tilde J_{w^m_t}(s^m_{t+1}) - \tilde J_{w^m_t} (s^m_t) = g_{s^m_t} - w^m_t  $.
+    If we always start sampling from state n, a complete trajectory $ \tau_{m-1} = \tau_m = \tau_{m+1} = (n, n-1, \ldots, 0) $
+    \begin{align*}
+        w_{m+1} =& w_{m} + \gamma \sum^{n-1}_{t=0} d_t \sum^{t}_{k=0} \nabla_{w} \tilde J_{w_m}(s^m_k) \cdot \lambda^{t-k}\\
+        =& w_{m} + \gamma \sum^{n-1}_{t=0} (g_{n-t} - w_m) \sum^{t}_{k=0} (n-k) \lambda^{t-k}\\
+        =& w_m + \gamma \sum^{n}_{t=1} (g_{t} - w_m) \sum^{n}_{k = t} k \lambda^{k-t}\\
+        =& w_m \cdot \left( 1 - \gamma \sum^{n}_{t = 1} \sum^{n}_{k=t} k \lambda^{k-t} \right) + \gamma \sum^{n}_{t=1} g_t \sum^{n}_{k=t} k \lambda^{k-t}
+    \end{align*}
+    If $ 0 < \gamma < 2{\left( \sum^{n}_{t = 1} \sum^{n}_{k=t} k \lambda^{k-t}  \right)}^{-1} $, the sequence $ w_m $ is a contraction sequence, and converges to the scalar $ \hat w(\lambda) $, which satisfies that
+    \[
+        \sum^{n}_{k=1} (g_k - \hat w(\lambda)) \sum^{n}_{k=t} k\lambda^{k-t} = 0
+    \]
+    \[
+        \hat w(1) = \frac{ \sum^{n}_{t=1} g_t \sum^{n}_{k=t} k}{ \sum^{n}_{t=1} \sum^{n}_{k=t} k}
+        = \frac{ \sum^{n}_{t = 1} t \sum^{t}_{k=1} g_k}{ \sum^{n}_{t=1} t^2} , \quad
+        \hat w(0) = \frac{ \sum^{n}_{t=1} t g_t  }{ \sum^{n}_{t=1} t } 
+    \]
+    We go back to the sum of squared errors
+    \[
+        \sum^{n}_{s=1} {\left( J(s) - \tilde J_{w}(s) \right)}^{2} \Rightarrow \sum^{n}_{s=1} s(J(s) - w s) = 0 \Rightarrow w = \frac{ \sum^{n}_{t=1} t J(t) }{ \sum^{n}_{t=1} t^2} 
+    \]
+    Because $ J(t) = \sum^{t}_{k = 1} g_t $, therefore $ \hat w(1) $ is the minimization of the sum of squared errors.
+    In this problem, $ TD(1) $ is poor approximation because of the approximation function and $ TD(0) $ is worse because of $ \lambda $.
+\end{example}
+
+\subsubsection*{$ \gamma $ Discounted Problems}%
+In the absence of an absorbing termination state, the trajectory never terminates and the entire algorithm involves a single infinitely long trajectory.
+It's necessary to gradually reduce $ \gamma $ towards zero as the algorithm progresses.
+\[
+    d^m_t = g^{\pi}(s_t, s_{t+1}) + \gamma \tilde J_{w^m_{t}} (s^m_{t+1}) - \tilde J_{w^m_{t}} (s^m_{t})
+\]
+\[
+    w^{m}_{t+1} = w^{m}_{t} + \alpha d^m_t \sum^{t}_{k = 0} {(\gamma\lambda)}^{t - k} \nabla_w \tilde J_{w^{m}_{t}}(s^{m}_{t})
+\]
+
+\subsubsection*{$ TD(\lambda) $ Can Diverge for Nonlinear Architectures}%
+
+\begin{example}
+    \[
+        P^{\pi} =
+        \begin{bmatrix}
+            1/2 & 0 & 1/2 \\
+            1/2 & 1/2 & 0 \\
+            0 & 1/2 & 1/2
+        \end{bmatrix}
+        \quad
+        Q =
+        \begin{bmatrix}
+            1 & 1/2 & 3/2 \\
+            3/2 & 1 & 1/2 \\
+            1/2 & 3/2 & 1
+        \end{bmatrix}
+    \]
+    And the cost is zero.
+
+    Let $ \tilde J_{w} = (f_1(w), f_2(w), f_3(w)) $, and $ \frac{d \tilde J_{w}}{d w} = (Q + \epsilon I) \tilde J_w  $, $ {s.t.} f_1(0) + f_2(0) + f_3(0) = 0$.
+    Let $ F(w) = f_1(w) + f_2(w) + f_3(w) $, then $ \frac{d F(w)}{d w} = (3 + \epsilon) F(w), s.t. F(0) = 0 $. We can get $ F(w) = 0 $.
+    
+    Because $ Q + Q^T = 2 \vec{1} {\vec{1}}^{T} $, therefore $ \tilde J _{w}^{T} (Q + Q^T) \tilde J_w = 0 \Rightarrow \tilde J^{T}_{w} Q \tilde J_{w} = 0 $
+    \[
+        \frac{d}{dw} {\Arrowvert \tilde J_w \Arrowvert}_2^2 = \tilde J_w^T (Q + Q^T) \tilde J_w + 2\epsilon {\Arrowvert \tilde J_w \Arrowvert}_2^2 = 2\epsilon {\Arrowvert \tilde J_w \Arrowvert}_2^2
+    \]
+    For a single infinitely long trajectory leads to the update equation
+    \[
+        w_{t+1} = w_{t} + \alpha_t\frac{d \tilde J_{w_t} (s_t)}{ d w} (\gamma \tilde J_{w_t}(s_{t+1}) - \tilde J_{w_t} (s_t))
+    \]
+    \begin{align*}
+        \mathbb{E}\left[ \frac{d \tilde J_{w_t} (s_t)}{d w} (\gamma \tilde J_{w_t}(s_{t+1}) - \tilde J_{w_t} (s_t)) \right] 
+        =& \frac{1}{3} \sum^{3}_{i=1} \frac{d \tilde J_{w_t}(i)}{d w} \left( \gamma \sum^{3}_{j=1} p_{ij} \tilde J_{w_t}(j) - \tilde J_{w_t}(i) \right) \\
+        =& \frac{1}{3} {\left( (Q + \epsilon I ) \tilde J_{w_t} \right)}^{T} (\gamma P - I) \tilde J_{w_{t}}\\
+        =& \frac{\gamma}{3} \tilde J_{w_t}^T Q^T P \tilde J^{T}_{w_t} + \frac{\epsilon}{3} \tilde J^{T}_{w_t}(\gamma P - I) \tilde J_{w_t} = \frac{d w}{dt} 
+    \end{align*}
+    If $ \epsilon = 0 $, 
+    \[
+         \frac{dw}{dt} = \frac{\gamma}{6} \tilde J^{T}_{w_t} \left( Q^T P + P^T Q \right) \tilde J_{w_t} 
+    \]
+    It's easy to verify that $ Q^T P + P^T Q \succ 0 $, which means
+    \[
+        \frac{dr}{dt} \ge c {\Arrowvert \tilde J_{w_t} \Arrowvert}_2^2
+    \]
+\end{example}
+I have some question about this example. I will refer to Chapter4 {ODE}.
+
+\subsubsection{$ TD(\lambda) $ with Linear Architectures-Discounted Problems}%
+
+For $ \vec{w} \in \mathbb{R}^{K} $, $ \tilde J_{\vec{w}} (s) = \langle \vec{w}, \phi(s) \rangle $, where $ s \in S = \left\{ 1, 2, \ldots, n \right\} $. And let 
+\[
+    \Phi = \left[ \phi_1, \ldots, \phi_K \right] = {\left[ \phi(1), \ldots, \phi(n) \right]}^T
+\]
+Then
+\[
+    \tilde J_{\vec{w}} = \Phi \vec{w} \Rightarrow \nabla_{\vec{w}} \tilde J_{\vec{w}}(s) = \phi(s)
+\]
+\begin{align*}
+    w^{m}_{t+1} =& w^{m}_{t} + \alpha_t d_t \sum^{t}_{k = 0} {(\gamma\lambda)}^{t-k} \nabla_{w} \tilde J_{w^m_t}(s_k)\\
+    =& w^{m}_{t} + \alpha_t d_t \sum^{t}_{k=0} {(\gamma\lambda)}^{t-k} \phi(s_k)
+\end{align*}
+Let $ z_t = \sum^{t}_{k=0} {(\gamma\lambda)}^{t-k} \phi(s_k) $, then $ w^{m}_{t+1} = r^{m}_{t} + \alpha_t d_t z_t $ and $ z_{t+1} = \gamma\lambda z_t + \phi(s_{t+1}) $
+
+\begin{assumption}
+    \begin{enumerate}
+        \item $ \sum^{\infty}_{t=0} \alpha_t = \infty $, and $ \sum^{\infty}_{t=0} \alpha^2_t < \infty $;
+        \item $ \forall s, s' \in S, \pi_\infty(s') = \forall \lim_{t \to \infty} P(s_t = s' | s_0 = s) > 0  $;
+        \item $ K \le n $ and $ \Phi $ has full colomn rank.
+    \end{enumerate}
+\end{assumption}
+
+We denote a steady-state probabilties $ \pi_\infty = \left( \pi(1), \ldots, \pi(n) \right) $, which satisfies
+\[
+    \pi_\infty^T P = \pi_\infty^T
+\]
+
+Define: $ {\Arrowvert J \Arrowvert}_D^2 = J^T D J = \sum^{n}_{i=1} \pi_{\infty}(i) J^2(i) $
+\begin{lemma}
+    \[
+        \Arrowvert PJ \Arrowvert_D \le \Arrowvert J \Arrowvert_D
+    \]
+    \begin{align*}
+        \Arrowvert PJ \Arrowvert^2_D =& J^T P^T D P J = \sum^{n}_{i=1} \pi_{\infty}(i) {\left( \sum^{n}_{j=1} p_{ij} J(j) \right)}^2 \le \sum^{n}_{i=1} \pi_\infty(i) \sum^{n}_{j=1} p_{ij}J^2(j)\\
+        \le& \sum^{n}_{j=1} \pi_\infty(j) J^2(j) = J^T D J = \Arrowvert J \Arrowvert^2_{D}
+    \end{align*}
+\end{lemma}
+
+\[
+    d_t z_t = (g(s_t, s_{t+1}) + \gamma {\phi(s_{t+1})}^T w_t - {\phi(s_t)}^{T} w_t) z_t
+    = z_t \left( \gamma {\phi(s_{t+1})}^T - {\phi(s_t)}^{T} \right) w_t + z_t g(s_t, s_{t+1})
+\]
+We donte
+\[
+    d_t z_t = A(X_t) w_t + b(X_t) 
+\]
+The following is trying to calculate $ \mathbb{E}_{\pi_{\infty}}\left[ A(X_t) \right] $ and $ \mathbb{E}_{\pi_{\infty} } \left[ b(X_t) \right]$.
+Some trivial result:
+\begin{enumerate}
+    \item $ \mathbb{E}_{\pi_{\infty}} \left[ J^T(s_0) J(s_m) \right] = J^T D P^{m} J $;
+    \item $ \mathbb{E}_{\pi_{\infty}} \left[ \phi(s_0) \phi^T(s_m) \right] = \Phi^T D P^m \Phi$;
+    \item 
+        \begin{align*}
+           \lim_{t \to \infty} \mathbb{E}_{\pi_{\infty}} \left[ A(X_t) \right] 
+           =& \lim_{t \to \infty} \mathbb{E}_{\pi_{\infty}} \left[\sum^{t}_{k=0} {(\gamma\lambda)}^{t-k }\phi(s_k)(\gamma\phi^T (s_{t+1}) - \phi^T(s_t))\right]\\
+           =& \lim_{t \to \infty} \sum^{t}_{k=0} {(\gamma \lambda)}^{t-k}\Phi^{T} D \left[ \gamma P^{t-k+1} - P^{t-k} \right] \Phi\\
+           =& \lim_{t \to \infty} \sum^{t}_{m = 0} {(\gamma\lambda)}^{m} \Phi^T D \left[ \gamma P^{m+1} - P^{m} \right] \Phi\\
+           =& \Phi^T D \left( (1 - \lambda) \sum^{\infty}_{m=0} \lambda^m{(\gamma P)}^{m+1} - I \right) \Phi
+        \end{align*}
+    \item 
+        \begin{align*}
+            \lim_{t \to \infty} \mathbb{E}_{\pi_{\infty}}\left[ b(X_t) \right]
+            =& \lim_{t \to \infty} \mathbb{E}_{\pi_{\infty}}\left[ \sum^{t}_{k=0} {(\gamma\lambda)}^{t-k} \phi(s_k) g(s_t,s_{t+1}) \right]\\
+            =& \lim_{t \to \infty} \sum^{t}_{k=0} {(\gamma\lambda)}^{t-k} \mathbb{E}_{\pi_{\infty}} \left[ \phi(s_k) g(s_t, s_{t+1}) \right]\\
+            =& \lim_{t \to \infty} \sum^{t}_{k=0} {(\gamma\lambda)}^{t-k} \Phi^T D P^{t-k} \sum^{}_{s' \in S} g(s, s')\\
+            =& \lim_{t \to \infty} \sum^{t}_{m=0} {(\gamma\lambda)}^{m} \Phi^{T} D P^{m} \sum^{}_{s' \in S} g(s,s')\\
+            =& \Phi^T D \sum^{\infty}_{m=0} {(\gamma\lambda P)}^m \bar g, \quad \left( where\ \bar g = \sum^{}_{s' \in S} g(s, s') \right)
+        \end{align*}
+    \item Denote $ M = (1 - \lambda) \sum^{\infty}_{m=0} \lambda^m{(\gamma P)}^{m+1} $.
+        \begin{align*}
+            \Arrowvert MJ \Arrowvert_D \le& (1 - \lambda) \sum^{\infty}_{m = 0} \lambda^m \gamma^{m+1} \Arrowvert P^{m+1} J \Arrowvert_D \le \frac{\gamma (1 - \lambda)}{1 - \gamma \lambda} \Arrowvert J \Arrowvert_D
+        \end{align*}
+    \item $ \mathbb{E}_{\pi_{\infty}} \left[ A(X_t) \right] = A \prec 0 $
+        \begin{align*}
+            J^T D M J =& J^T D^{1/2} D^{1/2} MJ \le {\Arrowvert D^{1/2} J \Arrowvert}_2 \cdot {\Arrowvert D^{1/2} M J \Arrowvert}_2 = \Arrowvert J \Arrowvert_D \Arrowvert MJ \Arrowvert_D \\
+            \le& \frac{\gamma(1 - \lambda)}{1 - \gamma\lambda} \Arrowvert J \Arrowvert_D \cdot \Arrowvert J \Arrowvert_D = \frac{\gamma(1 - \lambda)}{1 - \gamma\lambda} J^T D J \le \gamma J^T D J
+        \end{align*}
+        \[
+            J^T D(M-I)J \le (\gamma - 1) J^T D J < 0, \quad \forall J \ne 0
+        \]
+\end{enumerate}
+I need go back to Chapter4.
+Here I give up again. Martingales theorem is too ugly.
+To use convergence theorem in chapter4, we need to proof: $ \exists C, \rho $
+\begin{itemize}
+    \item 
+        \[
+            \Arrowvert \mathbb{E} \left[ A(X_t) | X_0 = X \right] - A \Arrowvert \le C \rho^t.
+        \]
+        \begin{proof}
+            \begin{align*}
+                &\mathbb{E} \left[ A(X_t) | X_0 = X \right] 
+                = \mathbb{E} \left[ z_t \phi^T{(s_t)} | s_0, s_1, z_0 \right] 
+                = \mathbb{E}\left[ \sum^{t}_{k=0} \phi(s_m) {(\gamma\lambda)}^{t-k} \phi^T(s_t) | s_0, s_1, z_0 \right]\\
+                =& A + \mathbb{E}\left[ \sum^{t}_{k=0} \phi(s_m) {(\gamma\lambda)}^{t-k} \phi^T(s_t) | s_0, s_1, z_0 \right]
+                - \lim_{t' \to \infty} \mathbb{E}_{\pi_{\infty}}\left[ \sum^{t'}_{k=0} \phi(s_m) {(\gamma\lambda)}^{t'-k} \phi^T(s_{t'}) \right]
+            \end{align*}
+            \begin{align*}
+                \lim_{t' \to \infty} \mathbb{E}_{\pi_{\infty}}\left[ \sum^{t'}_{k=t+1} \phi(s_m) {(\gamma\lambda)}^{t'-k} \phi^T(s_{t'}) \right] \le M {(\gamma\lambda)}^{t} \sum^{\infty}_{m = 1} {(\lambda\gamma)}^{m} 
+                = \frac{\gamma\lambda M}{1 - \gamma\lambda} {(\gamma\lambda)}^{t}
+            \end{align*}
+            (S is finite?)
+            \begin{align*}
+                \sum^{t}_{k = 0} \sum^{n}_{j=1} \left( P\left( s_m = j | s_1 \right) - \pi_{\infty}(j) \right) \phi(j) \mathbb{E} \left[ \phi^T(s_t) | s_m = s \right]
+            \end{align*}
+            And $ P\left( s_m = j | s_1 \right) $ converges to $ \pi_{\infty} $ exponentially fast in m.
+        \end{proof}
+    \item 
+        \[
+            \Arrowvert \mathbb{E}\left[ b(X_t) | X_0 = X \right] - b \Arrowvert \le C \rho^t
+        \]
+        \begin{proof}
+            \begin{align*}
+                &\mathbb{E}\left[ b(X_t) | X_0 = X \right] = b + \mathbb{E}\left[ \sum^{t}_{k=0} {(\gamma\lambda)}^{t-k} \phi(s_k) g(s_t, s_{t+1}) | s_0, s_1, z_0 \right] - b
+            \end{align*}
+            $ \lim_{k \to \infty} \left[ \sum^{t'}_{k = t} {(\gamma\lambda)}^{t-k}\phi(s_k) g(s_t, s_{t+1}) \right] $ convergences exponentially. And
+            \[
+                \sum^{t}_{k=0} \sum^{n}_{j=1} \left( P(s_m = j | s_1) - \pi_{\infty}(j) \right) \phi(j)\mathbb{E}\left[ g(_t, s_{t+1}) | s_m = s \right]
+            \]
+            also convergences exponentially.
+        \end{proof}
+\end{itemize}
+
+The $ TD(\lambda) $ algorithm convergence to $ Ar^{\infty} + b = 0 $.
+\[
+    \Phi^T D \left( (1 - \lambda) \sum^{\infty}_{m = 0} \lambda^m{(\gamma P)}^{m+1} - I \right) \Phi \cdot r^{\infty}
+    + \Phi^{T} D \sum^{\infty}_{m = 0} {(\gamma \lambda P)}^{m} \sum^{}_{s' \in S} g(s, s') = 0
+\]
+\begin{definition} Let $ \sum^{}_{s' \in S} g(s, s') = \bar g $
+    \[
+        T_{\pi}^{(\lambda)} J = (1 - \lambda) \sum^{\infty}_{m = 0} \lambda^m {(\lambda P^{\pi})}^{m+1} J + \sum^{\infty}_{m=0} {(\gamma\lambda P^{\pi})}^{m} \bar g = MJ + q
+    \]
+\end{definition}
+It's easy to verify that $ T^{(\lambda)}_{\pi} J = J^{\pi} $
+\[
+    A r^{\infty} + b = \Phi^T D T^{(\lambda)}_{\pi} (\Phi r^{\infty}) - \Phi^T D \Phi r^{\infty} = 0
+\]
+
+\[
+    \Rightarrow \Phi r^{\infty} = \Pi  T^{(\lambda)}_{\pi}(\Phi r^{\infty}), \quad
+    \Pi = \Phi {(\Phi^T D \Phi)}^{-1} \Phi^T D
+\]
+
+\begin{lemma}
+    \[
+        \Arrowvert \Pi J - J \Arrowvert_{D} = \min_{r} \Arrowvert \Phi r - J \Arrowvert_{D}
+    \]
+\end{lemma}
+
+$ J^{\Pi} = \Phi r^{\infty} $ is the fixed point of $ \Pi T^{(\lambda)}_{\pi} $, $ J^{\pi} $ is the fixed point of $ T^{(\lambda)}_{\pi} $. Then we want estimate
+
+\begin{lemma}
+    \[
+        \Arrowvert \Phi r^{\infty} - J^{\pi} \Arrowvert_{D} = \Arrowvert J^{\Pi} - J^{\pi} \Arrowvert_D \le \frac{1 - \gamma\lambda}{1 - \gamma} \Arrowvert \Pi J^{\pi} - J^{\pi} \Arrowvert_D 
+    \]
+\end{lemma}
+\begin{align*}
+    \Arrowvert J^{\Pi} - J^{\pi} \Arrowvert_D \le& \Arrowvert J^{\Pi} - \Pi J^{\pi} \Arrowvert_D + \Arrowvert \Pi J^{\pi} - J^{\pi} \Arrowvert_D\\
+    \le& \Arrowvert \Pi T^{(\lambda)}_{\pi} J^{\Pi} - \Pi T^{(\lambda)}_{\pi} J^{\pi} \Arrowvert_{D} +\Arrowvert \Pi J^{\pi} - J^{\pi} \Arrowvert_D\\
+    \le& \frac{\gamma(1 - \lambda)}{1 - \gamma\lambda} \Arrowvert J^{\Pi} - J^{\pi} \Arrowvert_D + \Arrowvert \Pi J^{\pi} - J^{\pi} \Arrowvert_D\\
+\end{align*}
+
+The case of an infinite state space (either discrete or continuous) has note been addressed before in this book.
+
+\subsection{$ TD(\lambda) $ with Linear Architectures --- Stochastic Shortes Path Problems}%
+
+Assumption
+\begin{enumerate}
+    \item $ \sum^{\infty}_{k=0} \gamma_k=\infty, \sum^{\infty}_{k=0} \gamma^2_k < \infty $;
+    \item all states have positive probability of being visited by the algorithm;
+    \item $ \Phi $ has full columns ranks.
+\end{enumerate}
+
+We use {off-line} method.
+\begin{align*}
+    A =& \mathbb{E}^{\pi} \left[ \sum^{N-1}_{t=0} z_t(\phi^T(s_{t+1}) - \phi^T(s_t)) \right]\\
+    =& \mathbb{E}^{\pi} \left[ \sum^{N-1}_{t=0} \sum^{t}_{k=0} \lambda^{t-m} \phi(s_m) (\phi^T(s_{i+1}) - \phi^T(s_t))  \right]\\
+    =& \mathbb{E}^{\pi}\left[ \sum^{\infty}_{t=0} \sum^{t}_{k=0} \lambda^{t-m} \phi(s_m) (\phi^T(s_{i+1}) - \phi^T(s_t))  \right]\\
+    =& \Phi^{T} \sum^{\infty}_{t=0} \sum^{t}_{k = 0} Q_{k} {(\lambda P)}^{t-k} (P - I) \Phi \\
+    B =& \sum^{\infty}_{t=0} Q_t \sum^{\infty}_{k=1} {(\lambda P)}^{k}(P - I) 
+    = \sum^{\infty}_{t=0} Q_t \left( (1 - \lambda) \sum^{\infty}_{k=0} \lambda^k P^{k+1} - I \right) = Q(M - I)
+\end{align*}
+
+\begin{lemma}
+    \[
+        B \prec 0.
+    \]
+    \begin{proof}
+        \begin{enumerate}
+            \item $ \lambda = 1 $, $ B = -Q \prec 0 $.
+            \item $ 0 < \lambda < 1 $.\\
+                Let $ q_t = diag(Q_t) $ and $ q = diag(Q) $.\\
+                $ q^T_{t} P = q^{T}_{t+1} \Rightarrow  q^{T} P = q - q_0 \preceq q$.\\
+                $ \Arrowvert P J \Arrowvert_{Q} \le \Arrowvert J \Arrowvert_Q, P^{k}J \rightarrow 0 \Rightarrow \Arrowvert M J \Arrowvert_Q < \Arrowvert J \Arrowvert_Q $. \\
+                More specifically, $ \exists \rho > 0, \Arrowvert MJ \Arrowvert_{Q} \le \rho \Arrowvert J \Arrowvert_Q $.
+                \[
+                    J^T Q M J \le \Arrowvert J \Arrowvert_Q \Arrowvert M J \Arrowvert_Q \le \rho J^T D J
+                \]
+                \[
+                    J^T Q (M-I) J \preceq -(1 - \rho) J^T D J \prec 0
+                \]
+            \item $ \lambda = 0 $: $ M = P $.
+                For Markov matrix property, $ P $'s eigenvalues are all nonnegative. And for assumption $ P^{k} \rightarrow 0 $, the eigenvalues are all smaller than 1. Then $ Q(P - I) $ is negative definite.
+        \end{enumerate}
+    \end{proof}
+\end{lemma}
+
+\subsubsection*{Error Bounds}%
+
+\[
+    \Arrowvert \Phi r^{\infty} - J^{\pi} \Arrowvert_Q \le \frac{ \Arrowvert \Pi J^{\pi} - J^{\pi} \Arrowvert_{Q}}{ 1 - \beta } 
+\]
+where $ \beta $ is the contraction factor of the operator $ T^{(\lambda)} $, which is equal to the contraction factor of matrix
+\[
+    M = (1 - \lambda) \sum^{\infty}_{k = 0} \lambda^{k} P^{k+1}.
+\]
+If $ \lambda = 1 $, we have $ M = 0 $ and $ \beta = 0 $, and we obtain the most favorable bound.
+
+\subsection{OPTIMISTIC POLICY ITERATION}%
+\label{sub:optimistic_policy_iteration}
+
+
