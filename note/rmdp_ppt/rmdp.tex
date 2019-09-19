@@ -150,7 +150,36 @@ We change it into
             V_{k+1} = T^{m}_{\pi_{k+1}, \Omega} V_k
         \end{cases}
     \]
-    
 \end{frame}
 
+\begin{frame}[t]{Regularized Modified Policy Iteration}
+    \[
+        \begin{cases}
+            \pi_{k+1} = \arg\max_{\pi} T_{\pi, \Omega} V_t + \epsilon'_{k+1}\\
+            V_{k+1} = T^{m}_{\pi_{k+1}, \Omega} V_k + \epsilon_{k+1}
+        \end{cases}
+    \]
+    \begin{enumerate}
+        \item Denote:$ \Gamma^n = (\gamma P_{\pi_1})(\gamma P_{\pi_2})\ldots(\gamma P_{\pi_n}) $, $ d_0 = V^{*,\Omega} - V_0 $ and $ b_0 = V_0 - T^{\pi_1,\Omega} V_0 $;
+        \item $ V^{*,\Omega} - V^{\pi_k,\Omega} = 2 \sum^{k-1}_{i=1} \Gamma^{j} \left| \epsilon_{k-i} \right| + \sum^{k-1}_{i=0} \sum^{\infty}_{j=i} \Gamma^{j} \left| \epsilon'_{k-i} \right| + 2\sum^{\infty}_{j=k} \min \left\{ \left| d_0 \right|, \left| b_0 \right| \right\} $
+        \item
+            $  \Arrowvert l_{k,\Omega} \Arrowvert_{p,\rho} \le 2 \sum^{k-1}_{i=1} \frac{\gamma^i}{1 - \gamma} {(C^{i}_q)}^{\frac{1}{p} } \Arrowvert \epsilon_{k-i} \Arrowvert_{pq', \mu} + \sum^{k-1}_{i=0} \frac{\gamma^i}{1 - \gamma} {(C^{i}_{q})}^{    \frac{1}{p} } \Arrowvert \epsilon'_{k-i} \Arrowvert_{pq', \mu} + \frac{2\gamma^{k}}{1 - \gamma} {(C^{i}_{q})}^{\frac{1}{p}     } \min ( \Arrowvert d_0 \Arrowvert_{pq',\mu}, \Arrowvert b_0 \Arrowvert_{pq',\mu})$
+        \item Related algorithm: Soft Q-learning, Soft Actor-Critic.
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}[t]{Mirror Descent Modified Policy Iteration}
+    \begin{itemize}
+        \item $ \Omega_{\pi'_{s}}(\pi_s) = D_{\Omega}(\pi_s \Arrowvert \pi'_{s}) = \Omega(\pi_s) - \Omega(\pi'_s) - \langle \nabla \Omega(\pi'_s), \pi_s - \pi'_s \rangle $;
+        \item $ \pi_{k+1} = \arg\max_{\pi} \langle Q_k, \pi \rangle - D_{\Omega}(\pi \Arrowvert \pi_k) $;
+    \end{itemize}
+    \begin{definition}
+        \textbf{(Mirror Descent Modified Policy Iteration).}
+        \begin{enumerate}
+            \item Type1: $ \pi_{k+1} = \arg\max_{\pi} T_{\pi, \Omega_{\pi_k}}V_k, V_{k+1}=T^{m}_{\pi_{k+1}, \Omega_{\pi_k}}V_k$;       
+            \item Type2: $ \pi_{k+1} =  \arg\max_{\pi} T_{\pi, \Omega_{\pi_k}}V_k, V_{k+1}=T^{m}_{\pi_{k+1}, \Omega_{\pi_{k+1}}}V_k = T^{m}_{\pi_{k+1}} V_k $.
+        \end{enumerate}
+    \end{definition}
+    Related Algorithm: {MD-MPI} type 2 with $ m = \infty $ and a KL divergence as the regularizer is {TRPO}.
+\end{frame}
 \end{document}

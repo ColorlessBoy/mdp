@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1568816884 "rmdp.tex" "rmdp.pdf" "rmdp" 1568816884
+["pdflatex"] 1568872033 "rmdp.tex" "rmdp.pdf" "rmdp" 1568872033
   "/etc/texmf/web2c/texmf.cnf" 1561474345 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1511824771 3332 103109f5612ad95229751940c61aada0 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1480098698 1004 54797486969f23fa377b128694d548df ""
@@ -24,6 +24,7 @@
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/sansmathaccent/mathkerncmssi8.tfm" 1480098717 1676 fb6c6a335484692abff897d6e8965829 ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb" 1480098733 30251 6afa5cb1d0204815a708a080681d4674 ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb" 1480098733 36299 5f9df58c2139e7edcf37c8fca4bd384d ""
+  "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb" 1480098733 37166 8ab3487cbe3ab49ebce74c29ea2418db ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb" 1480098733 35469 70d41d2b9ea31d5d813066df7c99281c ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb" 1480098733 24457 5cbb7bdf209d5d1ce9892a9b80a307cc ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss12.pfb" 1480098733 24393 3b7eb51a67a0a62aec5849271bdb9c2e ""
@@ -194,15 +195,15 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1520210507 32485 c64754543d8ac501bea6e75e209ea521 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1561474377 2700761 ac0584cc9514ab21918550a6948c4ee2 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1561474395 4128994 f5c978851ccb8f9b02061b85555fbf48 ""
-  "rmdp.aux" 1568816884 2124 7ff7a0108849b0fdcd89e3440d27599a ""
-  "rmdp.nav" 1568816884 1011 83c4ff004b77303d878240d0bcc95e05 ""
-  "rmdp.out" 1568816884 0 d41d8cd98f00b204e9800998ecf8427e ""
-  "rmdp.tex" 1568816884 8196 bf06a84ca6a7345fd8d6904ff6cd72d6 ""
+  "rmdp.aux" 1568872033 2387 c7d37cb32ff8f0a3e6506b103353a5b0 ""
+  "rmdp.nav" 1568872033 1202 a971439ba5eedf62b158aa4c3f07763d ""
+  "rmdp.out" 1568872033 0 d41d8cd98f00b204e9800998ecf8427e ""
+  "rmdp.tex" 1568872032 10444 832bd033158bcd0d9684187c89574a1f ""
   (generated)
-  "rmdp.toc"
-  "rmdp.aux"
   "rmdp.nav"
-  "rmdp.snm"
+  "rmdp.toc"
   "rmdp.log"
+  "rmdp.snm"
   "rmdp.out"
   "rmdp.pdf"
+  "rmdp.aux"
