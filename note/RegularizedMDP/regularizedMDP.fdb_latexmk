@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1568793987 "regularizedMDP.tex" "regularizedMDP.pdf" "regularizedMDP" 1568811629
+["pdflatex"] 1568793987 "regularizedMDP.tex" "regularizedMDP.pdf" "regularizedMDP" 1568871325
   "/etc/texmf/web2c/texmf.cnf" 1561474345 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1511824771 3332 103109f5612ad95229751940c61aada0 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1480098698 1004 54797486969f23fa377b128694d548df ""
@@ -143,10 +143,10 @@
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1561474377 2700761 ac0584cc9514ab21918550a6948c4ee2 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1561474395 4128994 f5c978851ccb8f9b02061b85555fbf48 ""
   "regularizedMDP.aux" 1568793987 1692 5faed9b6ffdabb5abb5d7eb89ed8de5d ""
-  "regularizedMDP.tex" 1568801305 34865 59720bbcf95c485cf326ab59864f7a86 ""
+  "regularizedMDP.tex" 1568816938 34865 59720bbcf95c485cf326ab59864f7a86 ""
   "regularizedMDP.toc" 1568793987 1288 c31a9aea707ef739f5fbc2ffbe9c5bbe ""
   (generated)
-  "regularizedMDP.aux"
   "regularizedMDP.toc"
   "regularizedMDP.pdf"
   "regularizedMDP.log"
+  "regularizedMDP.aux"
