@@ -1,0 +1,178 @@
+\documentclass[a4paper]{article}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{tcolorbox}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+% newtheorem
+\newtheorem{assumption}{Assumption}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{corollary}{Corollary}
+\newtheorem{claim}{Claim}
+\newtheorem{example}{Example}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+
+\title{Distributionally Robust Reinforcement Learning}
+\author{Peng Lingwei}
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Distributionally robust policy evaluation}%
+\label{sec:distributionally_robust_policy_evaluation}
+
+\begin{definition}
+    \textbf{(Adversarial Bellman operator).}
+    \[
+        \mathcal{U}_{\epsilon}(\pi) = \left\{ \tilde \pi \in \Pi^{MR} | D_{KL}(\tilde \pi(\cdot | s) \Arrowvert \pi(\cdot | s)) \le \epsilon(s), \forall s \in S \right\}
+        \Rightarrow T_{\pi^{\epsilon}} V := \min_{\tilde \pi \in \mathcal{U}_{\epsilon}(\pi)} T^{\tilde \pi} V 
+    \]
+\end{definition}
+
+Target:
+\[
+    T_{\pi^{\epsilon}}V = \min_{\tilde\pi \in \Pi^{MR}}\max_{\lambda_s > 0} [T_{\tilde \pi}(s)]
+    + \lambda_s D_{KL}(\tilde \pi(s) \Arrowvert \pi(s)) - \lambda_s \epsilon(s)
+\]
+\begin{align*}
+    &T = \max_{\tilde \pi \in \Pi^{MR}} \min_{\alpha \ne 0} \alpha( \sum^{}_{a} \tilde \pi(s, a) - 1) 
+    - \langle \tilde\pi(s), Q_{V}(s, \cdot) \rangle 
+    - \lambda_s \left( \sum^{}_{a} \tilde \pi(s, a) \ln \tilde \pi(s, a) - \sum^{}_{a} \tilde \pi(s,a) \ln(\pi(s,a)) \right) \\
+    \Rightarrow& \alpha - Q_{V}(s, \cdot) - \lambda_s \left( \ln \tilde \pi(s,\cdot) + 1 - \ln\pi(s,\cdot) \right) = 0
+    \quad (\Rightarrow T = \lambda_s - \alpha)\\
+    \Rightarrow& 1 - \frac{\alpha}{\lambda_s} = \ln \sum^{}_{a} \exp\left\{ -Q_V(s,a)/\lambda_s \right\} \pi(s,a)
+    \quad (\Rightarrow T = \lambda_s \ln \left\{\sum^{}_{a} \exp\left\{ -Q_V(s,a)/\lambda_s \right\} \pi(s,a))\right\}\\
+    \Rightarrow& T^{\pi^{\epsilon}}V(s) = \max_{\lambda_s > 0} (-T) - \lambda_s \epsilon(s) = -\left\{\min_{\lambda_s > 0}\lambda_s \ln \left\{\sum^{}_{a} \exp\left\{ -Q_V(s,a)/\lambda_s \right\} \pi(s,a)\right\}+\lambda_s \epsilon(s)\right\}\\
+    \Rightarrow&\pi^{\epsilon}(a | s, \lambda_s) \propto\sum^{}_{a} \exp\left\{ -Q_V(s,a)/\lambda_s \right\} \pi(s,a)
+\end{align*}
+Furthermore, we obtain
+\[
+    \lambda^*_s = \arg\min_{\lambda_s > 0} \lambda_s \Omega_{\pi_{s}}^*\left( -Q_V/\lambda_s \right)+\lambda_s \epsilon(s)
+\]
+
+Now, we have Adversarial Modified Policy Iteration algorithm:
+\[
+    \pi_{t+1} = \arg\min_{\pi} T_{\pi} V_t, \quad V_{t+1} = T^{m}_{\pi^{\epsilon_t}_{t+1}} V_t
+\]
+
+\begin{definition}
+    \textbf{(Distributionally robust modified policy iteration).}
+    \[
+        \begin{cases}
+            \epsilon_t(s) = C {n_{t}(s)}^{-\eta} \cdot 1_{\left\{ n_t(s) \ge t/S \right\}}\\
+            \pi_{t+1} = \arg\min_{\pi} T_{\pi} V_t, \quad V_{t+1} = T^{m}_{\pi^{\epsilon_t}_{t+1}} V_t
+        \end{cases}
+    \]
+    \begin{algorithm}[H]
+        \caption{Distributionally Robust Policy Iteration}
+        \begin{algorithmic}
+            \Require{$ C, \eta > 0 $.}
+            \Repeat:
+            \State{$ \pi = \arg\min_{\pi} T_\pi V $}
+            \State{$ \epsilon = Cn^{-\eta} $}
+            \State{$ \lambda = \arg\min_{\lambda > 0} \lambda \Omega_{\pi_{s}}^*\left( -Q_V/\lambda \right)+\lambda \epsilon(s) $}
+            \State{$ \pi^{\epsilon}(s) \propto \exp{\{-Q_V(s)/\lambda\}} \pi(s) $}
+            \State{$ V = T^{\pi^{\epsilon}} V $}
+            \Until{convergence}
+        \end{algorithmic}
+    \end{algorithm}
+\end{definition}
+
+\section{Extension to regularized policies}%
+
+\begin{definition}
+    \textbf{(Soft adversarial Bellman operator).}
+    \[
+        T_{\pi^{\epsilon},\Omega} V = \min_{\tilde \pi \in \mathcal{U}_{\epsilon}(\pi)}T_{\tilde \pi, \Omega}V
+    \]
+\end{definition}
+
+\[
+    T_{\pi^{\epsilon}, \Omega} V(s) = \min_{\tilde \pi} \max_{\lambda_s > 0} \langle \tilde \pi(s), Q_V(s) \rangle - \Omega(\tilde \pi(s)) + \lambda_s D_{KL}(\tilde \pi(s) \Arrowvert \pi(s)) - \lambda_s \epsilon(s)
+\]
+\begin{enumerate}
+    \item 
+    If we use $ \Omega(\tilde \pi(s)) = \beta_s \sum^{}_{a} \tilde \pi(s,a) \ln \tilde \pi(s,a)$, then,
+    \begin{align*}
+        & T = \max_{\tilde\pi} \min_{\alpha \ne 0} \alpha( \sum^{}_{a} \tilde \pi(s,a) - 1) - \langle \tilde \pi(s), Q_V(s) \rangle 
+        + \beta_s \sum^{}_{a} \tilde \pi(s,a) \ln \tilde \pi(s,a) \\
+        &- \lambda_s  \left\{ \sum^{}_{a} \tilde \pi(s,a) \ln \tilde \pi(s,a) - \sum^{}_{a} \tilde \pi(s,a) \ln \pi(s,a) \right\}\\
+        \Rightarrow&
+        \alpha - Q_V(s) + \beta_s(1 + \ln \tilde \pi(s)) - \lambda_s \left\{ 1 + \ln \tilde \pi(s) - \ln \pi(s) \right\} = 0
+        \quad( T = -\alpha - \beta_s + \lambda_s)\\
+        \Rightarrow& \frac{\alpha}{\beta_s - \lambda_s} + 1
+        = \ln\sum^{}_{a} \exp\left\{ \frac{Q_V(s)}{\beta_s - \lambda_s} - \frac{\lambda_s \ln \pi(s)}{\beta_s-\lambda_s} \right\}\\
+        (\Rightarrow& T = (\lambda_s - \beta_s)\ln\sum^{}_{a} \exp\left\{ \frac{Q_V(s)}{\beta_s - \lambda_s} - \frac{\lambda_s \ln \pi(s)}{\beta_s-\lambda_s} \right\})\\
+        \Rightarrow&
+        \pi^{\epsilon}(a | s, \lambda) \propto \exp\left\{ \frac{Q_V(s)}{\beta_s - \lambda_s} - \frac{\lambda_s \ln \pi(s)}{\beta_s-\lambda_s} \right\} 
+        = {\left\{ \exp\left\{ -\frac{Q_V(s)}{\lambda_s}\right\} \pi(s) \right\}}^{\frac{\lambda_s}{\lambda_s - \beta_s} }\\
+        \Rightarrow& -T_{\pi^{\epsilon}, \Omega}V(s) = \min_{\lambda_s > 0} (\lambda_s - \beta_s)\ln\sum^{}_{a} \exp\left\{ \frac{Q_V(s)}{\beta_s - \lambda_s} - \frac{\lambda_s \ln \pi(s)}{\beta_s-\lambda_s} \right\}  + \lambda_s \epsilon(s)
+    \end{align*}
+\item If $ \Omega_{\pi(s)}(\tilde \pi(s)) = \beta_s D_{KL}(\tilde \pi(s) \Arrowvert \pi(s)) $:
+    \begin{align*}
+        &T = \max_{\tilde \pi \in \Pi^{MR}} \min_{\alpha \ne 0} \alpha( \sum^{}_{a} \tilde \pi(s, a) - 1) 
+    - \langle \tilde\pi(s), Q_{V}(s, \cdot) \rangle \\
+    &- (\lambda_s-\beta_s) \left( \sum^{}_{a} \tilde \pi(s, a) \ln \tilde \pi(s, a) - \sum^{}_{a} \tilde \pi(s,a) \ln(\pi(s,a)) \right) \\
+    \Rightarrow& T = (\lambda_s - \beta_s) \ln \sum^{}_{a} \exp \left\{ \frac{Q_V(s)}{\beta_s - \lambda_s}  \right\} \pi(s)\\
+    \Rightarrow& -T_{\tilde\pi^{\epsilon}, \Omega}V(s) = \min_{\lambda_s > 0} (\lambda_s - \beta_s)\ln \sum^{}_{a} \exp \left\{ \frac{Q_V(s)}{\beta_s - \lambda_s}  \right\}\pi(s) + \lambda_s \epsilon(s)
+    \end{align*}
+\item $ \mathcal{U} = \left\{ \sum^{}_{a} \pi(s,a) \ln\pi(s,a) \ge \epsilon \right\} $ and $ \Omega(\pi(s)) = \beta_s \sum^{}_{a} \pi(s,a) \ln \pi(s,a) $
+    \[
+        T_{\pi^{\epsilon}, \Omega}V(s) = \min_{\pi \in \Pi^{MR}}\max_{\lambda_s > 0} \langle \pi(s), Q_V(s) \rangle - \beta_s \Omega(\pi(s)) + \lambda_s \sum^{}_{a} \pi(s,a) \ln \pi(s,a) - \lambda_s \epsilon(s)
+    \]
+    Let $ T = \max_{\pi} \min_{a \ne 0} \alpha ( \sum^{}_{a} \pi(s,a) - 1) - \langle \pi(s), Q_V(s) \rangle + (\beta_s - \lambda_s) \sum^{}_{a} \pi(s,a) \ln \pi(s,a)$
+    \[
+        T_{\pi^{\epsilon}, \Omega}V(s) = \min_{\lambda_s > 0} (\lambda_s - \beta_s) \ln \sum^{}_{a} \exp\left\{ \frac{Q_V(s)}{\beta_s - \lambda_s} \right\} + \lambda_s \epsilon(s)
+    \]
+\item $  \mathcal{U} = \left\{ \sum^{}_{a} \pi(s,a) \ln\pi(s,a) \ge \epsilon \right\} $ and $ \Omega(\tilde\pi(s)) = \beta_s D_{KL}(\tilde \pi(s) \Arrowvert \pi(s)) $
+    \[
+        -T_{\tilde \pi^{\epsilon}, \Omega}V(s) = \min_{\lambda_s > 0} (\lambda_s - \beta_s) \ln \sum^{}_{a} \exp\left\{ \frac{Q_V(s)}{\beta_s - \lambda_s} + \frac{\beta_s \ln \pi(s)}{\beta_s - \lambda_s}  \right\} + \lambda_s \epsilon(s)
+    \]
+\end{enumerate}
+The preceeding situations belongs to a general cases:
+\begin{itemize}
+    \item $ U_{\epsilon}(\pi_1) = \left\{ \pi \in \Pi^{MR} | D_{KL}\left( \pi(s) | \pi_1(s) \right) \le \epsilon \right\} $
+    \item $ \Omega_{\pi_2}(\pi) = \beta_s D_{KL}(\pi(s) \Arrowvert \pi_2(s)) $
+    \item $ T_{\pi^{\epsilon}, \Omega}V(s) = \min_{\pi \in U_{\epsilon}(\pi_1)} T_{\pi, \Omega_{\pi_2}} V(s) $
+        \begin{align*}
+            T_{\pi^{\epsilon}, \Omega}V(s) =& \min_{\pi\in\Pi^{MR}} \max_{\lambda_s > 0} T_{\pi, \Omega_{\pi_2}}V(s) + \lambda_s D_{KL}(\pi \Arrowvert \pi_1) - \lambda_s \epsilon\\
+            =& \max_{\lambda_s > 0} \min_{\pi\in\Pi^{MR}} T_{\pi, \Omega_{\pi_2}}V(s) + \lambda_s D_{KL}(\pi \Arrowvert \pi_1) - \lambda_s \epsilon\\
+        \end{align*}
+        Let $ T(s) = \max_{\pi} \min_{\alpha \ne 0}\alpha( \sum^{}_{\alpha} \pi(s,a) - 1) 
+        - \langle \pi(s), Q_V(s) \rangle + \beta_s D_{KL}(\pi \Arrowvert \pi_2) - \lambda_s D_{KL}(\pi \Arrowvert \pi_1) $
+        \begin{align*}
+            &T_2(s) = \alpha - Q_V(s) + \beta_s\left(1 + \ln \pi(s) - \ln\pi_2(s)\right)
+            - \lambda_s \left( 1 + \ln \pi(s) - \ln\pi_1(s) \right) = 0\\
+            & (\lambda_s - \beta_s)\ln \pi(s) = \alpha - Q_V(s) - (\lambda_s - \beta_s) + \lambda_s \ln \pi_1(s) - \beta_s \ln \pi_2(s)\\
+            & \exp\left\{ 1 - \frac{\alpha}{\lambda_s - \beta_s}  \right\} = \sum^{}_{a} \exp\left\{ \frac{-Q_V(s)}{\lambda_s - \beta_s} + \frac{\lambda_s \ln \pi_1(s) - \beta \ln \pi_2(s)}{\lambda_s - \beta_s}  \right\}\\
+            & T(s) = \langle T_2(s), \pi(s) \rangle - \alpha - \beta_s + \lambda_s
+            = (\lambda_s - \beta_s) \ln\sum^{}_{a} \exp\left\{ \frac{-Q_V(s,a)}{\lambda_s - \beta_s} + \frac{\lambda_s \ln \pi_1(s, a) - \beta_s \ln \pi_2(s,a)}{\lambda_s - \beta_s}  \right\}\\
+            & -T_{\pi^{\epsilon}, \Omega}V(s) = \min_{\lambda_s > 0} (\lambda_s - \beta_s) \ln\sum^{}_{a} \exp\left\{ \frac{-Q_V(s,a)}{\lambda_s - \beta_s} + \frac{\lambda_s \ln \pi_1(s, a) - \beta_s \ln \pi_2(s,a)}{\lambda_s - \beta_s}  \right\} + \lambda_s \epsilon(s)
+        \end{align*}
+\end{itemize}
+
+\section{KL-regularized Bellman operator}%
+
+\[
+    \Omega^*_{\lambda}(Q_V(s, \cdot)) = \lambda \ln \mathbb{E}_{a \sim \mu(\cdot | s)} \exp(Q_V(s, a)/\lambda)
+\]
+Let $ F(x) = \frac{1}{x} \ln \mathbb{E}_{a \sim \mu(\cdot | s)}\exp \left( Q_V(s,a) x \right) $:
+\begin{itemize}
+    \item $ F(0) = \lim_{x \to 0} \frac{\mathbb{E}_{a \sim \mu(\cdot|s)} Q_V(s,a) \exp(Q_V(s,a) x)}{ \mathbb{E}_{a \sim \mu(\cdot | s)}\exp(Q_V(s,a) x)} = \mathbb{E}_{a \sim \mu(\cdot, s)} Q_V(s,a) $;
+    \item $ F'(0) = \lim_{x \to 0} \frac{ \mathbb{E}_{a \sim \mu(\cdot | s)}Q^2_V(s,a)\exp(Q_V(s,a) x) - {\{\mathbb{E}_{a \sim \mu(\cdot|s)} Q_V(s,a) \exp(Q_V(s,a) x)\}}^2 }{{\left[  \mathbb{E}_{a \sim \mu(\cdot | s)}\exp(Q_V(s,a) x) \right]}^2} = {Var}_{a \sim \mu} (Q_V(s, a)) $
+    \item $ F(x) = \mathbb{E}_{a\sim\mu}[Q_V(s,a)] + \frac{1}{2\lambda} {Var}_{a\sim \mu}[Q_V(s,a)] + O(\frac{1}{\lambda^2} ) $
+\end{itemize}
+
+
+
+\end{document}
