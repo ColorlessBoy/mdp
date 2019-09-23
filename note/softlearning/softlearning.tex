@@ -1,0 +1,125 @@
+\documentclass[a4paper]{article}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{tcolorbox}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+% newtheorem
+\newtheorem{assumption}{Assumption}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{corollary}{Corollary}
+\newtheorem{claim}{Claim}
+\newtheorem{example}{Example}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+
+\title{Soft Learning}
+\author{Peng Lingwei}
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Trust Region Policy Optimization}%
+
+\subsection{Basics}%
+
+\begin{enumerate}
+    \item Initial state: $ \rho_0: S \rightarrow \mathbb{R} $;
+    \item Total reward: $ \eta(\pi) = \mathbb{E}_{s_0, a_0, \ldots}\left[ \sum^{\infty}_{t=0} \gamma^{t} r(s_t) \right] $;
+    \item $ Q_{\pi}(s_t,a_t) = \mathbb{E}_{s_{t+1}, a_{t+1}, \ldots} \left[ \sum^{\infty}_{l=0} \gamma^{l}r(s_{t+l}) \right] $;
+    \item $ V_{\pi}(s_t) = \mathbb{E}_{a_t, s_{t+1},\ldots}\left[ \sum^{\infty}_{l=0} \gamma^{l}r(s_{t+l}) \right] $;
+    \item $ A_{\pi}(s,a) = Q_{\pi}(s,a) - V_{\pi}(s) $;
+    \item $ \eta(\tilde \pi) = \eta(\pi) + \mathbb{E}_{\tau\sim\tilde\pi}\left[ \sum^{\infty}_{t=0} \gamma^t A_{\pi}(s_t,a_t) \right] $
+        \begin{align*}
+            &\mathbb{E}_{\tau | \tilde\pi} \left[ \sum^{\infty}_{t=0} \gamma^t A_{\pi}(s_t, a_t) \right]
+            =\mathbb{E}_{\tau | \tilde\pi} \left[ \sum^{\infty}_{t=0} \gamma^t (r(s_t) + \gamma V_{\pi}(s_{t+1}) - V_{\pi}(s_t)) \right] = \mathbb{E}_{\tau | \tilde\pi}\left[ -V_{\pi}(s_0) + \sum^{\infty}_{t=0} \gamma^t r(s_t) \right]
+        \end{align*}
+    \item $ \rho_\pi(s) = P(s_0=s)+\gamma P(s_1=s) + \gamma^2 P(s_2 = s)+\cdots $;
+        \begin{align*}
+            \mathbb{E}_{\tau\sim\tilde\pi}\left[ \sum^{\infty}_{t=0} \gamma^t A_{\pi}(s_t,a_t) \right]
+            =& \sum^{\infty}_{t=0} \sum^{}_{s} P(s_t=s|\tilde\pi) \sum^{}_{a} \tilde\pi(a|s) \gamma^t A_{\pi}(s,a)\\
+            =& \sum^{}_{s} \sum^{\infty}_{t=0} \gamma^t P(s_t = s|\tilde \pi) \sum^{}_{a} \tilde\pi(a|s) A_{\pi}(s,a)\\
+            =& \sum^{}_{s} \rho_{\tilde\pi}(s) \sum^{}_{a} \tilde \pi(a|s) A_\pi(s,a)
+        \end{align*}
+    \item Hard: $ \eta(\tilde\pi) = \eta(\pi) + \sum^{}_{s} \rho_{\tilde\pi}(s) \sum^{}_{a} \tilde\pi(a|s) A_{\pi}(s,a)$ and \\
+        Easy: $ L_{\pi}(\tilde \pi) = \eta(\pi) + \sum^{}_{s} \rho_{\pi}(s) \sum^{}_{a} \tilde\pi(a|s) A_{\pi}(s,a) $;
+        \[
+            \nabla_{\theta}L_{\pi}(\pi_\theta) = \sum^{}_{s} \rho_{\pi}(s) \sum^{}_{a} A_{\pi}(s,a) \nabla_{\theta}\pi_{\theta}(a|s)
+        \]
+        \[
+            \nabla_{\theta}L_{\pi_{\theta_0}}(\pi_\theta) | _{\theta = \theta_0} = \sum^{}_{s} \rho_{\pi_{\theta_0}}(s) \sum^{}_{a} A_{\pi_{\theta_0}}(s,a) \nabla_{\theta}\pi_{\theta}(a|s)|_{\theta=\theta_0}
+        \]
+        Because policy gradient theorem:
+        \[
+            \nabla_\theta \eta(\pi_{\theta}) = \sum^{}_{s} \rho_{\pi_{\theta}}(s) \sum^{}_{a} Q_{\pi_{\theta}}(s,a) \nabla_{\theta}\pi(a|s) = \sum^{}_{s} \rho_{\pi_{\theta}}(s) \sum^{}_{a} A_{\pi_{\theta}}(s,a) \nabla_{\theta}\pi(a|s)
+        \]
+        Therefore $ \nabla_{\theta} L_{\pi_{\theta_0}}(\pi_\theta)|_{\theta=\theta_0} = \nabla_{\theta}\eta(\pi_\theta)|_{\theta = \theta_0} $. We also have $ L_{\pi_{\theta_0}}(\pi_{\theta_0}) = \eta(\pi_{\theta_0}) $.
+    \item Let $ \bar A(s) = \mathbb{E}_{a \sim \tilde \pi(\cdot | s)}\left[ A_\pi(s,a) \right] $.\\
+        Bound $ \left| \eta(\tilde \pi) - L_{\pi}(\tilde \pi) \right| = \sum^{\infty}_{t=0} \gamma^{t} \left| \mathbb{E}_{\tau\sim\tilde\pi}\left[ \bar A(s_t) \right] - \mathbb{E}_{\tau\sim\pi}[\bar A(s_t) ]\right|$.\\
+        Let $ n_t $ be the number of times that $ a_i \ne \tilde a_i $ for $ i < t $.\\
+        \[
+            \begin{cases}
+                \mathbb{E}_{s_t\sim\tilde\pi}[\bar A(s_t)] = P(n_t=0)\mathbb{E}_{s_t \sim \tilde\pi | n_t = 0}[\bar A(s_t)] + P(n_t>0)\mathbb{E}_{s_t \sim \tilde\pi | n_t > 0}[\bar A(s_t)]\\
+                \mathbb{E}_{s_t\sim\pi}[\bar A(s_t)] = P(n_t=0)\mathbb{E}_{s_t \sim \pi | n_t = 0}[\bar A(s_t)] + P(n_t>0)\mathbb{E}_{s_t \sim \pi | n_t > 0}[\bar A(s_t)]\\
+                \mathbb{E}_{s_t \sim \tilde\pi | n_t = 0}[\bar A(s_t)] =\mathbb{E}_{s_t \sim \pi | n_t = 0}[\bar A(s_t)] 
+            \end{cases}
+        \]
+        \begin{align*}
+            \left|\mathbb{E}_{s_t\sim\tilde\pi}[\bar A(s_t)] - \mathbb{E}_{s_t\sim\pi}[\bar A(s_t)] \right|
+            =&\left| P(n_t>0) \{\mathbb{E}_{s_t \sim \tilde\pi | n_t > 0}[\bar A(s_t)] - \mathbb{E}_{s_t \sim \pi | n_t > 0}[\bar A(s_t)]\}\right|\\
+            \le& 2 \left[ 1 - {(1-\alpha)}^{t} \right] \max_{s} \left[ \bar A(s) \right]
+        \end{align*}
+        \begin{align*}
+            \bar A(s) =& \mathbb{E}_{a \sim \tilde \pi(\cdot | s)}\left[ A_\pi(s,a) \right] 
+            = \mathbb{E}_{(a,\tilde a) \sim (\pi, \tilde \pi)}\left[ A_\pi(s,\tilde a) - A_{\pi}(s,a)\right] 
+            \quad since\quad \mathbb{E}_{a\sim\pi}\left[ A_{\pi}(s,a) \right] = 0\\
+            =& P(a \ne \tilde a | s) \mathbb{E}_{(a,\tilde a) \sim (\pi, \tilde \pi) | a\ne\tilde a}\left[ A_\pi(s,\tilde a) - A_{\pi}(s,a)\right] 
+        \end{align*}
+        \begin{definition}
+            $ (\pi, \tilde \pi) $ is $ \alpha- $coupled policy pair if $ (a, \tilde a) \sim (\pi, \tilde\pi)(s) \Rightarrow P(a \ne \tilde a | s) \le \alpha$.
+        \end{definition}
+        $ \alpha $-coupled policy $(\pi, \tilde\pi) \Rightarrow\bar A(s) \le 2\alpha \max_{s,a}\left| A_\pi(s,a) \right| \Rightarrow $
+        \[
+            \left| \eta(\tilde\pi) - L_{\pi}(\tilde \pi) \right|
+            \le \sum^{\infty}_{t=0} \gamma^t \cdot 4\alpha\left[ 1 - {(1-\alpha)}^{t} \right] \max_{s,a} \left| A_{\pi}(s,a) \right|
+            = \frac{4\alpha^2\gamma}{(1 - \gamma)(1 - \gamma(1 - \alpha))} \max_{s,a}\left| A_\pi (s,a) \right|
+        \]
+        \[
+            \left| \eta(\tilde\pi) - L_{\pi}(\tilde \pi) \right|
+            \le \frac{4\alpha^2\gamma}{{(1 - \gamma)}^{2}} \max_{s,a}\left| A_{\pi}(s,a) \right|
+        \]
+    \item $ \pi' = \arg\max_{\pi'} L_{\pi_{old}}(\pi') $ and $ \pi_{new}(a|s) = (1 - \alpha)\pi_{old}(a|s) + \alpha \pi'(a|s) $, then $ \pi_{new} $ and $ \pi_{old} $ are $ \alpha $-coupled.
+    \item Define total variation divergence $ D_{TV}(p \Arrowvert q) = \frac{1}{2} \sum^{}_{i} \left| p(i) - q(i) \right| $, If $ D_{TV}(p \Arrowvert q) \le \alpha $, and $ (i,j) \sim (p,q) $, then $ P(i = j) \ge 1 - \alpha $.
+        (No proof.)
+    \item $ D^{2}_{TV}(p\Arrowvert q) \le D_{KL}(p \Arrowvert q)\le \alpha $ (no proof). Define $ D^{\max}_{KL} = \max_{s} D_{KL}(\pi(s) \Arrowvert \tilde\pi(s)) $.Let $ \tilde \pi  = \arg\max_{\tilde\pi} L_{\pi}(\tilde\pi) - \frac{4\epsilon\gamma}{{(1 - \gamma)}^{2}} D^{\max}_{KL}(\pi, \tilde \pi) $, then
+        \[
+            \eta(\tilde\pi) \ge L_{\pi}(\tilde\pi) - \frac{4\epsilon\gamma}{{(1 - \gamma)}^{2}} D^{\max}_{KL}(\pi, \tilde \pi) \ge L_{\pi}(\pi) = \eta(\pi)
+        \]
+    \item $ \max_{\theta} L_{\theta_{old}}(\theta) - C D^{\max}_{KL}(\theta_{old}, \theta) $. If C is given by the theory, the step sizes would be very small. So, we use a const constraint instead
+        \[
+            \max_{\tehta} L_{\theta_{old}}(\theta), \quad s.t.\quad D^{\max}_{KL}(\theta_{old}, \theta) \le \delta
+        \]
+        The problem is still hard to solve, so we go further.
+        Define $ \bar D^{\rho}_{KL}(\theta_1, \theta_2) = \mathbb{E}_{s\sim\rho}\left[ D_{KL}(\pi_{\theta_1(s)} \Arrowvert \pi_{\theta_2}(s)) \right] $
+        \[
+            \max_{\tehta} L_{\theta_{old}}(\theta), \quad s.t.\quad \bar D^{\rho}_{KL}(\theta_{old}, \theta) \le \delta
+        \]
+    \item Sample-Based estimation:
+        \[
+            \max_{\theta} \mathbb{E}_{s \sim \rho_{old}, a \sim q} \left[ \frac{\pi_{\theta}(a|s)}{q(a|s)} Q_{\theta_{old}}(s,a) \right],
+            \quad s.t.\quad 
+            \mathbb{E}_{s \sim \rho_{old}} \left[ D_{KL}(\pi_{\theta_{old}}(s) \Arrowvert \pi_{\theta}(s)) \right] \le \delta
+        \]
+\end{enumerate}
+
+
+\end{document}
